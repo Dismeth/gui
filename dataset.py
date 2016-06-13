@@ -60,3 +60,8 @@ def split(dataset,target_column_name = 'target_purchase', test_set_size = 0.4, r
     target_value = dataset[target_column_name]
     X_train, X_test, y_train, y_test = cross_validation.train_test_split(dataset, target_value, test_size=test_set_size, random_state=random_state_is)
     return X_train, X_test, y_train, y_test
+
+def save_file(dataset, filelocation, name):
+    filelocation = str(filelocation)
+    name = str(name)
+    pd.DataFrame.to_csv(dataset, path_or_buf=filelocation)

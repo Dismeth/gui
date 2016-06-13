@@ -4,10 +4,7 @@ from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.properties import StringProperty
 from kivy.uix.popup import Popup
-from kivy.uix.progressbar import ProgressBar
 import dataset
-
-import os
 
 
 class LoadDialog(FloatLayout):
@@ -16,7 +13,10 @@ class LoadDialog(FloatLayout):
 
 
 class SaveDialog(FloatLayout):
-    pass
+    save = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    last_path = StringProperty(None)
 
 
 class Root(FloatLayout):
@@ -28,7 +28,9 @@ class Root(FloatLayout):
 
     def __init__(self,**kwargs):
         super(Root, self).__init__(**kwargs)
-        self.feedback("Welcome")
+        version = 0.1
+        welcome = "Welcome user. This is version " + str(version)
+        self.feedback(welcome)
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -40,7 +42,11 @@ class Root(FloatLayout):
         self._popup.open()
 
     def show_save(self):
-        pass
+        content = SaveDialog(save=self.save, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Save file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
     def show_split(self):
         if "data" not in globals():
             self.feedback("Please load a dataset.")
@@ -60,15 +66,21 @@ class Root(FloatLayout):
     def console(self):
         pass
 
+    """
+    output_str() is used for module/model output such as training error etc.
+    """
     def output_str(self,output):
         self.output_text = output
 
+    """
+    feedback() is used for simple feedback to the user such as finished loading data set etc.
+    """
     def feedback(self,feedback):
-        self.output_console =  feedback
+        self.output_console =  "Console: " + feedback
 
-    def progress_bar(self):
-        pass
-
+    """
+    load() shows a file browser to find an appropriate data set (csv format).
+    """
     def load(self, path, filename):
         global last_path
         global last_filename
@@ -82,13 +94,13 @@ class Root(FloatLayout):
         self.feedback("Fileimport completed")
         self.dismiss_popup()
 
-
+    """
+    save() need to fix this one. Ultimately dataset.save_file(dataset,path)
+    """
     def save(self, path, filename):
-        with open(os.path.join(path, filename), 'w') as stream:
-            stream.write(self.text_input.text)
-
+        dataset.dprint(str(path))
+        dataset.dprint(str(filename[0]))
         self.dismiss_popup()
-
 
 class Editor(App):
     pass

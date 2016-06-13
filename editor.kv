@@ -51,6 +51,7 @@ Root:
 
 <SaveDialog>:
     text_input: text_input
+
     BoxLayout:
         size: root.size
         pos: root.pos
@@ -74,4 +75,4 @@ Root:
 
             Button:
                 text: "Save"
-                on_release: root.save(filechooser.path, text_input.text)
+                on_release: root.save(filechooser.path,filechooser.selection)
