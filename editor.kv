@@ -1,7 +1,6 @@
 #:kivy 1.1.0
 
 Root:
-    text_input: text_input
 
     BoxLayout:
         orientation: 'vertical'
@@ -22,13 +21,9 @@ Root:
 				on_release: root.show_nbn()
 
         BoxLayout:
-            TextInput:
-                id: text_input
-                text: ''
-
             RstDocument:
-                text: text_input.text
-                show_errors: True
+                text: root.output_text
+                show_errors: False
 		BoxLayout
 			size_hint: 1, 0.1
 			RstDocument:

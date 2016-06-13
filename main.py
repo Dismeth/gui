@@ -24,6 +24,7 @@ class Root(FloatLayout):
     savefile = ObjectProperty(None)
     text_input = ObjectProperty(None)
     output_console = StringProperty(None)
+    output_text = StringProperty(None)
 
     def __init__(self,**kwargs):
         super(Root, self).__init__(**kwargs)
@@ -59,8 +60,11 @@ class Root(FloatLayout):
     def console(self):
         pass
 
-    def feedback(self,output):
-        self.output_console =  output
+    def output_str(self,output):
+        self.output_text = output
+
+    def feedback(self,feedback):
+        self.output_console =  feedback
 
     def progress_bar(self):
         pass
