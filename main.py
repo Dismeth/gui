@@ -52,7 +52,6 @@ class Root(FloatLayout):
             self.feedback("Start splitting the data.")
             data = dataset.split(data)
             self.feedback("Succesfully split the data.")
-            self.feedback("Updating to the GIT.")
 
     def show_nbn(self):
         self.feedback("To be implemented.")
