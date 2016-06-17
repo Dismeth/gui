@@ -14,8 +14,11 @@ Root:
                 text: 'Save'
                 on_release: root.show_save()
 			Button:
-				text: 'Split and Label Encode'
-				on_release: root.show_split()
+				text: 'Label Encode'
+				on_release: root.label_encode()
+			Button:
+				text: 'Settings'
+				on_release: root.show_settings()
 			Button:
 				text: 'Run Bayesian Network'
 				on_release: root.show_nbn()
@@ -58,7 +61,7 @@ Root:
         orientation: "vertical"
         FileChooserListView:
             id: filechooser
-            on_selection: text_input.text = self.selection and self.selection[0] or ''
+            on_selection: text_input.text = self.selection[0] or ''
 
         TextInput:
             id: text_input
@@ -75,4 +78,44 @@ Root:
 
             Button:
                 text: "Save"
-                on_release: root.save(filechooser.path,filechooser.selection)
+                on_release: root.save(filechooser.path,text_input.text)
+				
+<Settings>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+		BoxLayout:
+			size_hint_y: None
+            height: 30
+			Label:
+				text: "Test Set Size"
+			TextInput:
+				id: test_set_size
+				height: 30
+				multiline: False
+				text: 0.4
+			Label:
+				text: "Description"
+		BoxLayout:
+			size_hint_y: None
+            height: 30
+			Label:
+				text: "Test Set Size"
+			TextInput:
+				id: testing
+				height: 30
+				length: 10
+				multiline: False
+				text: "0.4"
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Apply Settings"
+                on_release: root.settings_save()
