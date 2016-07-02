@@ -6,6 +6,9 @@ from kivy.properties import StringProperty
 from kivy.properties import BoundedNumericProperty
 from kivy.uix.popup import Popup
 from dataset import DataSet
+import nbn
+import datetime
+import time
 
 
 class LoadDialog(FloatLayout):
@@ -25,7 +28,7 @@ class SplitData(FloatLayout):
 class Settings(FloatLayout):
     settings_save = ObjectProperty(None)
     cancel = ObjectProperty(None)
-    #test_set_size = BoundedNumericProperty(0.4, min=0.0, max=1.0)
+    test_set_size = BoundedNumericProperty(1, min=0.0, max=1.0,errorvalue=0.4)
     #k_fold = BoundedNumericProperty(5, min=1, max=20)
 
 class Root(FloatLayout):
@@ -38,10 +41,11 @@ class Root(FloatLayout):
 
     def __init__(self,**kwargs):
         super(Root, self).__init__(**kwargs)
-        version = 0.1
-        welcome = "Welcome user. This is version " + str(version)
+        version = 0.2
+        welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.loaded = False
         self.feedback(welcome)
+        self.output_text = ""
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -61,11 +65,14 @@ class Root(FloatLayout):
     def label_encode(self):
         if self.loaded:
             string_columns = ['C2', 'C4', 'C5', 'C6', 'C9', 'C11', 'C13', 'C15', 'C16', 'C17', 'C19', 'C20', 'C21', 'C22', 'C28', 'C30', 'C53', 'C60']
-            self.feedback("Start label encoded the data.")
+            self.output_str("Start label encoded the data.")
             data.labelencode(columns=string_columns)
+            self.output_str("End label encoded the data.")
             self.feedback("Succesfully label encoded the data.")
         else:
             self.feedback("Please load a dataset.")
+
+    """ Obsolete, all settings are made in settings-popup. """
 
     def show_split_data(self):
         content = SplitData(split=self.split_data, cancel=self.dismiss_popup)
@@ -77,20 +84,31 @@ class Root(FloatLayout):
         self._popup = Popup(title="Data Analysis Settings", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
 
-    def settings_save(self):
+    def settings_save(self, test_set_size):
         self.feedback("Settings Saved")
+        self.output_console = str(test_set_size)
+        self.output_str(str(test_set_size))
         #self.dismiss_popup()
 
     def split_data(self):
         if self.loaded:
-            self.feedback("Start splitting the data.")
+            self.output_str("Start splitting the data.")
             data.split()
+            self.output_str("End splitting the data.")
             self.feedback("Succesfully split the data.")
         else:
             self.feedback("Please load a dataset.")
 
     def show_nbn(self):
-        self.feedback("To be implemented.")
+        if self.loaded:
+            ypred,output,log_proba = nbn.naivebayesian(data)
+            self.output_str(ypred)
+            self.output_str(output)
+            self.feedback("Succesfully made a lol the data.")
+        else:
+            self.feedback("Please load a dataset.")
+
+
 
     def console(self):
         pass
@@ -99,7 +117,10 @@ class Root(FloatLayout):
     output_str() is used for module/model output such as training error etc.
     """
     def output_str(self,output):
-        self.output_text = output
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        self.output_text = str(self.output_text) + str(st) + ": " + str(output)
+        self.output_text += "\r \n"
 
     """
     feedback() is used for simple feedback to the user such as finished loading data set etc.
@@ -122,6 +143,7 @@ class Root(FloatLayout):
             self.loaded = True
         except (RuntimeError, TypeError, NameError):
             data.dprint("Error: most likely not a csv file.")
+        self.output_str("Successfully loaded the data set.")
         self.feedback("Fileimport completed")
         self.dismiss_popup()
 

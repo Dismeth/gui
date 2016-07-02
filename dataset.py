@@ -20,6 +20,11 @@ class DataSet():
 
     def __init__(self):
         self.numberoftime = 1
+        self.loaded = False
+        self.X_train = pd.DataFrame()
+        self.X_test = pd.DataFrame()
+        self.y_train = pd.DataFrame()
+        self.y_test = pd.DataFrame()
     """
     dprint() - Making a simple function to number the output for debugging purposes. Added incremental numbers for readability.
     Req: none
@@ -38,8 +43,14 @@ class DataSet():
     def dataimport(self, filelocation):
         filelocation = str(filelocation)
         self.dataset = pd.read_csv(filelocation)
+        self.loaded = True
         return self.dataset
 
+    def get_dataset(self):
+        if self.loaded:
+            return self.dataset
+        else:
+            return 0
     # columns = ['C2','C4','C5','C6','C9','C11','C13','C15','C16','C17','C19','C20','C21','C22','C28','C30','C53','C60']
 
     """
@@ -59,10 +70,16 @@ class DataSet():
     Split the data set into a training set and validation set. It also splits it into x (input) and y (target/output).
     Req: cross_validation from sklearn.
     """
-    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, random_state_is = 16):
+    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, random_state_is = True):
         target_value = self.dataset[target_column_name]
-        X_train, X_test, y_train, y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size, random_state=random_state_is)
-        return X_train, X_test, y_train, y_test
+        if random_state_is:
+            self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size)
+        else:
+            self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset,
+                                                                                                     target_value,
+                                                                                                     test_size=test_set_size,
+                                                                                                     random_state=random_state_is)
+        return self.X_train, self.X_test, self.y_train, self.y_test
 
     def save_file(self, path, filename):
         filepath = str(path) + '\\' + str(filename)
