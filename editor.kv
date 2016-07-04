@@ -46,8 +46,8 @@ Root:
                 text: 'Boosted Trees'
 				on_release: root.feedback("To be implemented.")
 			Menu:
-				text: 'Decision Trees'
-				on_release: root.feedback("To be implemented.")
+				text: 'TestButton'
+				on_release: root.testfunction()
 			Menu:
 				text: 'Help'
 				on_release: root.feedback("To be implemented.")
@@ -110,54 +110,120 @@ Root:
 
 <SetBox@BoxLayout>:
     size_hint_y: None
-    height: 30				
+    height: 30
+	canvas.before: 
+		Color: 
+			rgb: .2, .2, .2 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size	
 				
 <SetText@TextInput>:
     height: 30
-	length: 10
+	length: 20
 	multiline: False
 	
 <SetLabel@Label>:
     halign: 'right'
     valign: 'middle'
 	bold: True
+	length: 10
+	height: 30
 	
 <SetDesc@Label>:
     halign: 'left'
     valign: 'middle'
 	bold: False
 	text_size: cm(6), cm(3)
+	font_size: '12sp'
+	height: 30
+	lenght: 50
+	
 <SetCategory@Label>:
     halign: 'center'
     valign: 'middle'
 	bold: True
+	markup: True
+	canvas.before: 
+		Color: 
+			rgb: 0, 0, 0 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size	
 	
 				
 <Settings>:
-	test_set_size: test_set_size
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: "vertical"
 		SetBox:
 			SetCategory:
-				text: "Label Encoding"
+				text: "Label [color=09B9E5]Encoding[/color]"
+		SetBox:
+			height: 100
+			SetLabel:
+				text: "Columns To Encode"
+				height: 100
+			SetText:
+				id: le_columns
+				text: str(root.newconfigLE)
+				multiline: True
+				height: 100
+			SetDesc:
+				text: "The columns to be encoded."
+				height: 100
+		SetBox:
+			SetCategory:
+				text: "Cross [color=09B9E5]Validation[/color]"
+		SetBox:
+			SetLabel:
+				text: "Target Column"
+			SetText:
+				id: target_value
+				text: root.newconfigCV['target_value']
+			SetDesc:
+				text: "The target column in the data set."
 		SetBox:
 			SetLabel:
 				text: "Test Set Size"
 			SetText:
 				id: test_set_size
-				text: ""
+				input_filter: 'float'
+				text: str(root.newconfigCV['test_set_size'])
 			SetDesc:
-				text: "Description long before the shit got real"
+				text: "Between 0.0-1.0. The size of the training set. Default: 0.4"
 		SetBox:
 			SetLabel:
-				text: "Test Set Size"
+				text: "Seed"
 			SetText:
-				id: testing
-				text: ""
+				id: seed
+				input_filter: 'int'
+				text: str(root.newconfigCV['seed'])
 			SetDesc:
-				text: "Description"
+				text: "Set a seed for reproducible results. Default: random"
+		SetBox:
+			SetLabel:
+				text: "Random Seed"
+			Switch:
+				id: random_state
+				active: True
+			SetDesc:
+				text: "On: random seed. Off: use seed entered."
+		SetBox:
+			SetCategory:
+				text: "Feaure [color=09B9E5]Importance[/color]"
+				
+		SetBox:
+			SetLabel:
+				text: "Column(s) to Exclude"
+			SetText:
+				id: feature_importance
+				text: root.newconfigCV['target_value']
+			SetDesc:
+				text: "Set a list of columns to exclude in feature importance."
+
+
 
         BoxLayout:
             size_hint_y: None
@@ -165,7 +231,7 @@ Root:
             Button:
                 text: "Cancel"
                 on_release: root.cancel()
-
+				
             Button:
                 text: "Apply Settings"
-                on_release: root.settings_save(test_set_size.text)
+                on_release: root.settings_save(root.SaveSettings(target_value.text, test_set_size.text, seed.text,random_state.active))
