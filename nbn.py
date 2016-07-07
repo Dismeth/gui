@@ -65,11 +65,11 @@ def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = '
         info.loc[index] = (column, total_points, mislabeled, mislabeled)
 
     top_ten = info.sort_values(by='Mislabeled', ascending=True)
-    top_ten = top_ten.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
+    #top_ten = top_ten.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
     top_ten = top_ten.head(n=10)
     #plt.plot(column[''], mislabeled, lw=1, label='Column %s (mislabeled points: %d)' % (column, mislabeled))
     columns = top_ten['Column']
-    importance = top_ten['Importance']
+    importance = top_ten['Mislabeled']
     y_pos = np.arange(len(columns))
 
     plt.barh(y_pos, importance, align='center', alpha=0.4,label='Column (mislabeled points: %0.2f)')
