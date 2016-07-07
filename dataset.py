@@ -50,7 +50,7 @@ class DataSet():
         if self.loaded:
             return self.dataset
         else:
-            return 0
+            return 1
     # columns = ['C2','C4','C5','C6','C9','C11','C13','C15','C16','C17','C19','C20','C21','C22','C28','C30','C53','C60']
 
     """
@@ -70,7 +70,7 @@ class DataSet():
     Split the data set into a training set and validation set. It also splits it into x (input) and y (target/output).
     Req: cross_validation from sklearn.
     """
-    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, random_state_is = True):
+    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, seed=16, random_state_is = True):
         target_value = self.dataset[target_column_name]
         if random_state_is:
             self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size)
@@ -78,9 +78,22 @@ class DataSet():
             self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset,
                                                                                                      target_value,
                                                                                                      test_size=test_set_size,
-                                                                                                     random_state=random_state_is)
+                                                                                                     random_state=seed)
         return self.X_train, self.X_test, self.y_train, self.y_test
+
+    """
+    Split the dataset based on
+    """
 
     def save_file(self, path, filename):
         filepath = str(path) + '\\' + str(filename)
         pd.DataFrame.to_csv(self.dataset, path_or_buf=filepath)
+
+    def information(self):
+        if self.loaded:
+            a = list(self.X_train.columns.values)
+            b = list(self.X_test.columns.values)
+            #c = self.X_test.columns.values.tolist()
+            return (a,b)
+        else:
+            return 1

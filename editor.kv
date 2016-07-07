@@ -51,6 +51,9 @@ Root:
 			Menu:
 				text: 'Help'
 				on_release: root.feedback("To be implemented.")
+			Menu:
+                text: "Reset Settings"
+				on_release: root.initialiseSettings()
         BoxLayout:
             RstDocument:
                 text: root.output_text
@@ -122,6 +125,7 @@ Root:
     height: 30
 	length: 20
 	multiline: False
+	readonly: False
 	
 <SetLabel@Label>:
     halign: 'right'
@@ -207,7 +211,7 @@ Root:
 				text: "Random Seed"
 			Switch:
 				id: random_state
-				active: True
+				active: bool(root.newconfigCV['random_state_is'])
 			SetDesc:
 				text: "On: random seed. Off: use seed entered."
 		SetBox:
@@ -219,9 +223,17 @@ Root:
 				text: "Column(s) to Exclude"
 			SetText:
 				id: feature_importance
-				text: root.newconfigCV['target_value']
+				text: str(root.newconfigFI)
 			SetDesc:
 				text: "Set a list of columns to exclude in feature importance."
+		SetBox:
+			SetLabel:
+				text: "Apply List of Columns"
+			Switch:
+				id: apply_LE_list
+				active: bool(root.newconfigFIUse)
+			SetDesc:
+				text: "On: the listed columns will be excluded. Off: all columns used."
 
 
 
@@ -234,4 +246,4 @@ Root:
 				
             Button:
                 text: "Apply Settings"
-                on_release: root.settings_save(root.SaveSettings(target_value.text, test_set_size.text, seed.text,random_state.active))
+                on_release: root.settings_save(root.saveLE(le_columns.text), root.saveCV(target_value.text, test_set_size.text, seed.text,random_state.active), root.saveFI(feature_importance.text), root.saveFIUse(apply_LE_list.active))
