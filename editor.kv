@@ -28,7 +28,7 @@ Root:
 				text: 'Label Encode'
 				on_release: root.label_encode()
 			Menu:
-				text: 'Split / CrossValidation'
+				text: 'Split Data (train/test)'
 				on_release: root.split_data()
 			Menu:
 				text: 'Settings'
@@ -40,17 +40,17 @@ Root:
             size_hint_y: None
             height: 30
             Menu:
-				text: 'Naive Bayesian Network'
-				on_release: root.show_nbn()
+				text: 'Feature Imp.'
+				on_release: root.show_feature_importance()
             Menu:
-                text: 'Boosted Trees'
-				on_release: root.feedback("To be implemented.")
+                text: 'RandomForest'
+				on_release: root.show_randomforest()
 			Menu:
-				text: 'TestButton'
-				on_release: root.testfunction()
+				text: 'Naive Bayesian Net.'
+				on_release: root.show_nbn()
 			Menu:
-				text: 'Help'
-				on_release: root.feedback("To be implemented.")
+				text: 'QuickLoad'
+				on_release: root.debug_quick_load()
 			Menu:
                 text: "Reset Settings"
 				on_release: root.initialiseSettings()

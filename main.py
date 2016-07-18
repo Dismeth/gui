@@ -10,6 +10,7 @@ from kivy.properties import BooleanProperty
 from kivy.uix.popup import Popup
 from kivy.uix.switch import Switch
 from dataset import DataSet
+import randomForest
 import nbn
 import datetime
 import time
@@ -70,18 +71,22 @@ class Root(FloatLayout):
     def initialiseSettings(self):
         self.configCV = {'target_value': 'target_purchase', 'test_set_size': 0.4, 'seed': 16, 'random_state_is': True}
         self.configLE = ['C2', 'C4', 'C5', 'C6', 'C9', 'C11', 'C13', 'C15', 'C16', 'C17', 'C19', 'C20', 'C21', 'C22', 'C28', 'C30', 'C53', 'C60']
-        self.configFI = ['record_ID', 'target_purchase'] #example columns to exclude
-        self.configFIUse = True # because record_ID and target_purchase is included.
+        self.configFI = ['C2'] #example columns to exclude
+        self.configFIUse = False # This has been updated.. Need to figure out how to control this one. (because record_ID and target_purchase is included.)
+        self.feedback("Settings has been reset.")
 
     def __init__(self,**kwargs):
         super(Root, self).__init__(**kwargs)
-        version = 0.2
-        welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
+        """ Global variables to be edited in the settings """
         self.loaded = False
+        self.initialiseSettings()
+        """ Welcome message etc """
+        version = 0.3
+        welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
         self.output_text = ""
-        """ Global variables to be edited in the settings """
-        self.initialiseSettings()
+
+
 
 
     def dismiss_popup(self):
@@ -158,23 +163,49 @@ class Root(FloatLayout):
         self.output_str(updated_use_fi)
         self.dismiss_popup()
 
-    def testfunction(self):
+    """
+    Testfunction to test new features.
+    """
+
+    def debug_quick_load(self):
         data = DataSet()
+        self.quick = DataSet()
         data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
         data.labelencode(columns=self.configLE)
-        data.split()
-        best = nbn.imp_topten(data, self.configFI, self.configFIUse, target_column_name='target_purchase')
-        print(best)
-        #best = best.sort_values(by='Mislabeled',ascending=True)
-        #print(best.head(n=10))
+        xtest, xtrain, ytest, ytrain = data.split(quick=True)
+        self.quick.import_split(xtest, xtrain, ytest, ytrain)
+        self.output_str("10 percent of original dataset loaded (into train. Testset is 90 percent).")
+        rows_train = len(xtrain)
+        self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
 
+    def show_feature_importance(self):
+        if self.loaded:
+            randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
+        elif self.quick.exists():
+            randomForest.feature_importance_RandomForest(self.quick, self.configFI, self.configFIUse)
+        else:
+            self.feedback("Please load a dataset.")
 
+    """
+    Build a RandomForest classifier.
+    """
 
+    def show_randomforest(self):
+        if self.loaded:
+            randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
+        elif self.quick.exists():
+            randomForest.buildRandomForest(self.quick, self.configFI, self.configFIUse)
+        else:
+            self.feedback("Please load a dataset.")
+
+    """
+    function split_data(): splits the data into a training set and validation set with user's options.
+    """
     def split_data(self):
         if self.loaded:
             self.output_str("Start splitting the data.")
             data.split(target_column_name = self.configCV['target_value'], test_set_size = self.configCV['test_set_size'], seed = self.configCV['seed'], random_state_is = self.configCV['random_state_is'])
-            self.output_str("Finished splitting the data in UNKNOWN seconds")
+            self.output_str("Finished splitting the data.")
             self.feedback("Succesfully split the data.")
         else:
             self.feedback("Please load a dataset.")
@@ -185,7 +216,7 @@ class Root(FloatLayout):
             self.output_str(ypred)
             self.output_str(output)
             self.output_str(log_proba)
-            self.feedback("Succesfully made a lol the data.")
+            self.feedback("Succesfully made a NBN.")
         else:
             self.feedback("Please load a dataset.")
 

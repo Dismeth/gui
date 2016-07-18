@@ -46,6 +46,7 @@ class DataSet():
         self.loaded = True
         return self.dataset
 
+
     def get_dataset(self):
         if self.loaded:
             return self.dataset
@@ -70,8 +71,10 @@ class DataSet():
     Split the data set into a training set and validation set. It also splits it into x (input) and y (target/output).
     Req: cross_validation from sklearn.
     """
-    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, seed=16, random_state_is = True):
+    def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, seed=16, random_state_is = True, quick = False, quick_test_size = 0.9):
         target_value = self.dataset[target_column_name]
+        if quick:
+            test_set_size = quick_test_size
         if random_state_is:
             self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size)
         else:
@@ -79,7 +82,23 @@ class DataSet():
                                                                                                      target_value,
                                                                                                      test_size=test_set_size,
                                                                                                      random_state=seed)
+        # Drop the record ID and target_purchase variables. This must be generalised!
+        self.X_train = self.X_train.drop('record_ID', 1)
+        self.X_train = self.X_train.drop('target_purchase', 1)
+        self.X_test = self.X_test.drop('record_ID', 1)
+        self.X_test = self.X_test.drop('target_purchase', 1)
         return self.X_train, self.X_test, self.y_train, self.y_test
+
+    """
+    Used to save time
+    """
+    def import_split(self,xtrain,xtest,ytrain,ytest):
+        self.X_train = xtrain
+        self.X_test = xtest
+        self.y_train = ytrain
+        self.y_test = ytest
+        return self.X_train, self.X_test, self.y_train, self.y_test
+
 
     """
     Split the dataset based on

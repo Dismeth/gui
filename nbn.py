@@ -5,12 +5,12 @@ from sklearn import ensemble                        #
 from sklearn.naive_bayes import BernoulliNB         # Naive Bayesian Network - Bernoulli
 
 from scipy import interp
+from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import StratifiedKFold
-
 
 def naivebayesian(dataset):
     ds = dataset
@@ -77,6 +77,24 @@ def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = '
     draw(type="importance")
     return top_ten
 
+"""
+Function analysing the smaller dataset in order to find important features
+"""
+
+def quickanalyse(dataset,columns_to_exclude,exclude_columns,target_column_name = 'target_purchase'):
+    ds = dataset
+    targ = target_column_name
+    columns = list(ds.X_train.columns.values)
+    # Remove the columns to to be checked.
+    if exclude_columns:
+        for remove_column in columns_to_exclude:
+            columns.remove(remove_column)
+
+    info = pd.DataFrame(columns=['Column', 'Pearson', 'Mislabeled', 'Importance'])
+    for index, column in enumerate(columns):
+        info.loc[index] = (column,pearsonr(ds.X_train[[column]],ds.y_train),0,0)
+
+    return info
 
 def computeROC():
     # Compute ROC curve and area the curve
