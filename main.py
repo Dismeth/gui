@@ -8,6 +8,8 @@ from kivy.properties import DictProperty
 from kivy.properties import ListProperty
 from kivy.properties import BooleanProperty
 from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.clock import Clock
 from kivy.uix.switch import Switch
 from dataset import DataSet
 import randomForest
@@ -35,11 +37,18 @@ class Settings(FloatLayout):
     settings_save = ObjectProperty(None)
     cancel = ObjectProperty(None)
     #initialisesettings = ObjectProperty(None)
+    newconfigGeneral = DictProperty({})
     newconfigCV = DictProperty({})
     newconfigLE = StringProperty(None)
     newconfigFI = StringProperty(None)
     newconfigFIUse = BooleanProperty(None)
 
+    """
+    Functions to save all the settings from the settings window.
+    """
+    def saveGeneral(self, desc_stats_on_load):
+        self.newconfigGeneral['desc_stats_on_load'] = bool(desc_stats_on_load)
+        return self.newconfigGeneral
 
     def saveLE(self,le_columns):
         self.newconfigLE = le_columns
@@ -69,6 +78,7 @@ class Root(FloatLayout):
     output_text = StringProperty(None)
 
     def initialiseSettings(self):
+        self.configGeneral = {'desc_stats_on_load': True,'target_value': 'target_purchase'}
         self.configCV = {'target_value': 'target_purchase', 'test_set_size': 0.4, 'seed': 16, 'random_state_is': True}
         self.configLE = ['C2', 'C4', 'C5', 'C6', 'C9', 'C11', 'C13', 'C15', 'C16', 'C17', 'C19', 'C20', 'C21', 'C22', 'C28', 'C30', 'C53', 'C60']
         self.configFI = ['C2'] #example columns to exclude
@@ -85,8 +95,10 @@ class Root(FloatLayout):
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
         self.output_text = ""
-
-
+        """
+        Open Settings first time, needed a delay in order to wait for everything to be properly set.
+        """
+        Clock.schedule_once(self.show_startup_settings, 1)
 
 
     def dismiss_popup(self):
@@ -138,29 +150,51 @@ class Root(FloatLayout):
                     newconfig += ";" + conf # Semicolon used as separator. Can be changed.
         return newconfig
 
-    """ Not obsolete, all settings are made in settings-popup. """
+    """
+    Dummy function to enable the settings_popup to show at start.
+    """
+    def show_startup_settings(self, dt):
+        self.show_settings()
+
+    """
+    Function to call the settings_popup.
+    """
     def show_settings(self):
         content = Settings(settings_save=self.settings_save, cancel=self.dismiss_popup,
+                           newconfigGeneral=self.configGeneral,
                            newconfigCV=self.configCV, newconfigLE=self.transform_config(self.configLE),
                            newconfigFI=self.transform_config(self.configFI), newconfigFIUse=self.configFIUse)
         self._popup = Popup(title="Data Analysis Settings", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
 
-    """ Save Settings """
-    def settings_save(self, updated_configle, updated_configcv, updated_configfi, updated_use_fi):
-        self.feedback("Settings Saved")
+
+    """
+    Save Settings. Called when closing the settings_popup.
+    """
+    def settings_save(self, updated_configGeneral, updated_configle, updated_configcv, updated_configfi, updated_use_fi):
+        # Uncomment for debugging.
+        """
         self.output_str(updated_configcv)
         self.output_str(updated_configle)
         self.output_str(updated_configfi)
         self.output_str(updated_use_fi)
+        """
+        # Updates the config
+        self.configGeneral = updated_configGeneral
         self.configCV = updated_configcv
         self.configLE = self.transform_config(updated_configle,back=True)
         self.configFI = self.transform_config(updated_configfi,back=True)
         self.configFIUse = updated_use_fi
+        # Gives a feedback to the "console".
+        self.feedback("Settings Saved")
+        # Prints out the updated configs.. Uncomment for debugging.
+        """
         self.output_str(updated_configcv)
         self.output_str(self.configLE)
         self.output_str(self.configFI)
         self.output_str(updated_use_fi)
+        """
+        # Dismiss popup..
         self.dismiss_popup()
 
     """
@@ -168,6 +202,7 @@ class Root(FloatLayout):
     """
 
     def debug_quick_load(self):
+        """
         data = DataSet()
         self.quick = DataSet()
         data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
@@ -177,6 +212,17 @@ class Root(FloatLayout):
         self.output_str("10 percent of original dataset loaded (into train. Testset is 90 percent).")
         rows_train = len(xtrain)
         self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
+        test, descstats = self.quick.correlation()
+        print(test)
+        a = test.sort_values(by='Correlation', ascending=True).head(20)
+        b = test.sort_values(by='Correlation',ascending=False).head(20)
+        print(a)
+        print(b)
+        print(descstats)
+        self.quick.descstats()
+        """
+        descstats = data.descstats(self.configLE)
+
 
     def show_feature_importance(self):
         if self.loaded:
@@ -192,11 +238,18 @@ class Root(FloatLayout):
 
     def show_randomforest(self):
         if self.loaded:
-            randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
+            scores, total_points, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
+            loaded = True
         elif self.quick.exists():
-            randomForest.buildRandomForest(self.quick, self.configFI, self.configFIUse)
+            scores, total_points, mislabeled = randomForest.buildRandomForest(self.quick, self.configFI, self.configFIUse)
+            loaded = True
         else:
             self.feedback("Please load a dataset.")
+        if loaded:
+            self.output_str("Mean Score: " + scores)
+            self.output_str("Total points: " + total_points)
+            self.output_str(" " + mislabeled)
+
 
     """
     function split_data(): splits the data into a training set and validation set with user's options.
@@ -257,6 +310,9 @@ class Root(FloatLayout):
             data.dprint("Error: most likely not a csv file.")
         self.output_str("Successfully loaded the data set.")
         self.feedback("Fileimport completed")
+        if self.configGeneral['desc_stats_on_load']:
+            data.descstats(self.configLE)
+            self.output_str("Descriptive statistics performed.")
         self.dismiss_popup()
 
     """

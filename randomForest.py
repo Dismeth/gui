@@ -56,7 +56,7 @@ def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
 
 def buildRandomForest(dataset,columns_to_exclude,exclude_columns):
     ds = dataset
-    randforest = RandomForestClassifier(max_depth= 255, oob_score=True)
+    randforest = RandomForestClassifier(n_estimators=70, max_depth= 255, oob_score=True)
 
     """
     For own usage:
@@ -77,10 +77,8 @@ def buildRandomForest(dataset,columns_to_exclude,exclude_columns):
     total_points = ds.X_test.shape[0]
     mislabeled = (ds.y_test != y_pred).sum()
 
-    ds.dprint("CV Scores Mean: " + str(scores.mean()))
-    ds.dprint("Mislabeled: " + str(mislabeled))
-    ds.dprint("Total Points: " + str(total_points))
-    return scores.mean()
+
+    return scores.mean(), total_points, mislabeled
 
     #out_of_bag_prediction_for_x = randforest.oob_prediction_
 

@@ -6,6 +6,7 @@
 import pandas as pd                                 # Pandas
 from sklearn import preprocessing                   # Using label encoder to get strings (categories) into numeric values for Bayesian Network
 from sklearn import cross_validation                # K-Fold and cross validation
+from scipy.stats import pearsonr
 
 """
 THIS IS TEMP FOR OWN USAGE:
@@ -21,10 +22,10 @@ class DataSet():
     def __init__(self):
         self.numberoftime = 1
         self.loaded = False
-        self.X_train = pd.DataFrame()
-        self.X_test = pd.DataFrame()
-        self.y_train = pd.DataFrame()
-        self.y_test = pd.DataFrame()
+        self.X_train = None
+        #self.X_test = pd.DataFrame()
+        #self.y_train = pd.DataFrame()
+        #self.y_test = pd.DataFrame()
     """
     dprint() - Making a simple function to number the output for debugging purposes. Added incremental numbers for readability.
     Req: none
@@ -116,3 +117,44 @@ class DataSet():
             return (a,b)
         else:
             return 1
+
+    def correlation(self):
+        self.loaded = True
+        if self.loaded:
+            # used_columns is used to 'solve' the handshake problem. The total number of
+            # items in correlation_list should be : n(n-1)/2 where n = len(self.X_train.columns.values).
+            used_columns = []
+            correlation_list = pd.DataFrame(columns=['Var1', 'Var2','Correlation','P-Value'])
+            descstats_list = pd.DataFrame(columns=['Var', 'Mean','SumOfValues','Minimum','Maximum','Count','Std'])
+            i = 0
+            ii = 0
+            for column_a in self.X_train.columns.values:
+                var = self.X_train[column_a]
+                descstats_list.loc[ii] = [column_a, var.mean(), var.sum(), var.min(), var.max(), var.count(), var.std()]
+                for column_b in self.X_train.columns.values:
+                    if column_a == column_b or column_b in used_columns:
+                        pass
+                    else:
+                        corr, p = pearsonr(self.X_train[column_a],self.X_train[column_b])
+                        correlation_list.loc[i] = [column_a, column_b, corr, p]
+                        i += 1
+                used_columns.insert(i,column_a)
+                ii += 1
+            fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
+            pd.DataFrame.to_csv(correlation_list,fileloc + "Correlations.csv")
+            pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")
+            return correlation_list, descstats_list
+
+    def descstats(self,columns_to_exclude = ['record_ID','target_purchase']):
+        if self.loaded:
+            data = self.dataset
+            descstats_list = pd.DataFrame(columns=['Var', 'Mean', 'SumOfValues', 'Minimum', 'Maximum', 'Count', 'Std'])
+            for i, column_a in enumerate(data.columns.values):
+                if column_a in columns_to_exclude:
+                    pass
+                else:
+                    var = data[column_a]
+                    descstats_list.loc[i] = [column_a, var.mean(), var.sum(), var.min(), var.max(), var.count(), var.std()]
+            fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
+            pd.DataFrame.to_csv(descstats_list, fileloc + "DescStats.csv")
+            return descstats_list

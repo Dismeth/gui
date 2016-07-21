@@ -112,7 +112,10 @@ Root:
                 on_release: root.save(filechooser.path,text_input.text)
 
 <SetBox@BoxLayout>:
-    size_hint_y: None
+	# Added pos_hint: {'top': 1} and removed size_hint_y: None in order to fit the screen better.
+	# Set is short for Settings - all to be used in SettingsPopup.
+    #size_hint_y: None
+	pos_hint: {'top': 1}
     height: 30
 	canvas.before: 
 		Color: 
@@ -122,19 +125,26 @@ Root:
 			size: self.size	
 				
 <SetText@TextInput>:
+	pos_hint: {'top': 1}
+	size_hint_y: None
     height: 30
 	length: 20
 	multiline: False
 	readonly: False
 	
 <SetLabel@Label>:
+	size_hint_y: None
+	pos_hint: {'top': 1}
     halign: 'right'
     valign: 'middle'
 	bold: True
 	length: 10
 	height: 30
 	
+	
 <SetDesc@Label>:
+	size_hint_y: None
+	pos_hint: {'top': 1}
     halign: 'left'
     valign: 'middle'
 	bold: False
@@ -161,10 +171,24 @@ Root:
         size: root.size
         pos: root.pos
         orientation: "vertical"
+		pos_hint: {'top': 1}
+		size_hint_y: 1
+		SetBox:
+			SetCategory:
+				text: "General [color=09B9E5]Settings[/color]"
+		SetBox:
+			SetLabel:
+				text: "Descriptive stats. on load"
+			Switch:
+				id: desc_stats_on_load
+				active: bool(root.newconfigGeneral['desc_stats_on_load'])
+			SetDesc:
+				text: "Show and save descriptive statistics when loading new data set."
 		SetBox:
 			SetCategory:
 				text: "Label [color=09B9E5]Encoding[/color]"
 		SetBox:
+			size_hint_y: None
 			height: 100
 			SetLabel:
 				text: "Columns To Encode"
@@ -179,7 +203,7 @@ Root:
 				height: 100
 		SetBox:
 			SetCategory:
-				text: "Cross [color=09B9E5]Validation[/color]"
+				text: "Split [color=09B9E5]Data[/color]"
 		SetBox:
 			SetLabel:
 				text: "Target Column"
@@ -216,7 +240,7 @@ Root:
 				text: "On: random seed. Off: use seed entered."
 		SetBox:
 			SetCategory:
-				text: "Feaure [color=09B9E5]Importance[/color]"
+				text: "Feature [color=09B9E5]Importance[/color]"
 				
 		SetBox:
 			SetLabel:
@@ -246,4 +270,4 @@ Root:
 				
             Button:
                 text: "Apply Settings"
-                on_release: root.settings_save(root.saveLE(le_columns.text), root.saveCV(target_value.text, test_set_size.text, seed.text,random_state.active), root.saveFI(feature_importance.text), root.saveFIUse(apply_LE_list.active))
+                on_release: root.settings_save(root.saveGeneral(desc_stats_on_load.active),root.saveLE(le_columns.text), root.saveCV(target_value.text, test_set_size.text, seed.text,random_state.active), root.saveFI(feature_importance.text), root.saveFIUse(apply_LE_list.active))
