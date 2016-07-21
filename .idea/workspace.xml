@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fb60ad1c-12e9-45af-8f5d-347a3fb03d74" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dataset.py" afterPath="$PROJECT_DIR$/dataset.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/editor.kv" afterPath="$PROJECT_DIR$/editor.kv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nbn.py" afterPath="$PROJECT_DIR$/nbn.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/randomForest.py" afterPath="$PROJECT_DIR$/randomForest.py" />
     </list>
     <ignored path="gui.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -572,7 +567,14 @@
       <option name="project" value="LOCAL" />
       <updated>1468839975501</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Version 0.3. Just before a demo. Finished descriptive statistics on load. Can be turned off in Settings.">
+      <created>1469111687092</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1469111687092</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -621,7 +623,8 @@
     <MESSAGE value="Continued the previous work. Feature importance and making graphs. Feature importance is based on least mislabeled predictions for now. With trees I will probably implement using Gini index or something similar." />
     <MESSAGE value="Added Screenshots of version 0.2. Going to increase to version 0.3 when feature importance is properly implemented. Version 0.3 will include proper k-fold crossvalidation." />
     <MESSAGE value="Version 0.3. Just before a demo. Added RandomForest and Extra Random Trees feature importance.." />
-    <option name="LAST_COMMIT_MESSAGE" value="Version 0.3. Just before a demo. Added RandomForest and Extra Random Trees feature importance.." />
+    <MESSAGE value="Version 0.3. Just before a demo. Finished descriptive statistics on load. Can be turned off in Settings." />
+    <option name="LAST_COMMIT_MESSAGE" value="Version 0.3. Just before a demo. Finished descriptive statistics on load. Can be turned off in Settings." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
