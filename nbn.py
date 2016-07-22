@@ -3,7 +3,7 @@ import pandas as pd                                 # Pandas and Numpy
 import numpy as np                                  #
 from sklearn import ensemble                        #
 from sklearn.naive_bayes import BernoulliNB         # Naive Bayesian Network - Bernoulli
-from sklearn.naive_bayes import MultinomialNB       # Testing..
+#from sklearn.naive_bayes import MultinomialNB       # Testing..
 
 from scipy import interp
 from scipy.stats import pearsonr
@@ -13,14 +13,21 @@ from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import StratifiedKFold
 
-def naivebayesian(dataset):
+def naivebayesian(dataset,configFIUse,configFI):
     ds = dataset
     ds.dprint("Start Creating BernoulliNB Bayesian Network")
-    bnb = MultinomialNB()
-    y_pred = bnb.fit(ds.X_train, ds.y_train).predict(ds.X_test)
-    mislabeled = "Number of mislabeled points out of a total %d points : %d" % (ds.X_test.shape[0] ,(ds.y_test != y_pred).sum())
-    log_proba = bnb.score(ds.X_test, ds.y_test)
-    return (y_pred,mislabeled,log_proba)
+    if configFIUse:
+        ds.dprint("Excluding following columns: " + str(configFI))
+        X_train = ds.X_train.drop(configFI, inplace=False, axis=1)
+        X_test = ds.X_test.drop(configFI, inplace=False, axis=1)
+    else:
+        X_train = ds.X_train
+        X_test = ds.X_test
+    bnb = BernoulliNB()
+    y_pred = bnb.fit(X_train, ds.y_train).predict(X_test)
+    mislabeled = "Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0] ,(ds.y_test != y_pred).sum())
+    log_proba = bnb.score(X_test, ds.y_test)
+    return (mislabeled,log_proba)
 
 def nbnfeatureimportance(dataset, column_to_test, target_column_name = 'target_purchase'):
     ds = dataset

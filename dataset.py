@@ -119,7 +119,10 @@ class DataSet():
             return 1
 
     def correlation(self):
+        # TO DO: add removal of corr. data
+        # TO DO: add support for 'folder' to be used.
         self.loaded = True
+        check_recommendation = False
         if self.loaded:
             # used_columns is used to 'solve' the handshake problem. The total number of
             # items in correlation_list should be : n(n-1)/2 where n = len(self.X_train.columns.values).
@@ -140,6 +143,19 @@ class DataSet():
                         i += 1
                 used_columns.insert(i,column_a)
                 ii += 1
+            if check_recommendation:
+                # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
+                # Might be easier (and is shorter) to read by developers as an in house var name.
+                threshold = 0.7
+                df = correlation_list[correlation_list['Correlation' >= threshold]]
+                df = df.sort_values(by='Correlation')
+                var1 = df['Var1']
+                var2 = df['Var2']
+                column_a_b = [var1,var2]
+
+
+
+
             fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
             pd.DataFrame.to_csv(correlation_list,fileloc + "Correlations.csv")
             pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")

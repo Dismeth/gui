@@ -17,6 +17,7 @@ import nbn
 import datetime
 import time
 import timeit
+import pandas as pd
 
 
 class LoadDialog(FloatLayout):
@@ -118,6 +119,7 @@ class Root(FloatLayout):
 
     def label_encode(self):
         if self.loaded:
+            #Clock.schedule_once(lambda dt: self.feedback("Start label encoded the data."), -1)
             self.output_str("Start label encoded the data.")
             data.labelencode(columns=self.configLE)
             self.output_str("End label encoded the data.")
@@ -144,10 +146,10 @@ class Root(FloatLayout):
             newconfig = ""
             for conf in config:
                 if firstline:
-                    newconfig += conf
+                    newconfig += conf.upper() # .upper() should be removed in future..
                     firstline = False
                 else:
-                    newconfig += ";" + conf # Semicolon used as separator. Can be changed.
+                    newconfig += ";" + conf.upper() # Semicolon used as separator. Can be changed.
         return newconfig
 
     """
@@ -202,7 +204,7 @@ class Root(FloatLayout):
     """
 
     def debug_quick_load(self):
-        """
+        #"""
         data = DataSet()
         self.quick = DataSet()
         data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
@@ -212,16 +214,29 @@ class Root(FloatLayout):
         self.output_str("10 percent of original dataset loaded (into train. Testset is 90 percent).")
         rows_train = len(xtrain)
         self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
-        test, descstats = self.quick.correlation()
-        print(test)
-        a = test.sort_values(by='Correlation', ascending=True).head(20)
-        b = test.sort_values(by='Correlation',ascending=False).head(20)
-        print(a)
-        print(b)
-        print(descstats)
-        self.quick.descstats()
-        """
-        descstats = data.descstats(self.configLE)
+        correlation_list, descstats = self.quick.correlation()
+        #print(test)
+        #a = test.sort_values(by='Correlation', ascending=True).head(20)
+        #b = test.sort_values(by='Correlation',ascending=False).head(20)
+        #print(a)
+        #print(b)
+        #print(descstats)
+        #self.quick.descstats()
+        #"""
+        #Clock.schedule_once(lambda dt: self.feedback("this is good"), -1)
+        #descstats = data.descstats(self.configLE)
+        ############################################################
+        # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
+        # Might be easier (and is shorter) to read by developers as an in house var name.
+        threshold = 0.7
+        df = correlation_list[correlation_list['Correlation'] > threshold]
+        df = df.sort_values(by='Correlation',ascending=False)
+        column_a_b = df['Var1']
+        column_a_b = column_a_b.append(df['Var2'])
+        print(df[df['Var1'] == 'C31'])
+        print(column_a_b.value_counts())
+        #print(df.head(10))
+        print(pd.crosstab(df['Var1'], df['Var2']))
 
 
     def show_feature_importance(self):
@@ -246,9 +261,9 @@ class Root(FloatLayout):
         else:
             self.feedback("Please load a dataset.")
         if loaded:
-            self.output_str("Mean Score: " + scores)
-            self.output_str("Total points: " + total_points)
-            self.output_str(" " + mislabeled)
+            self.output_str("Mean Score: " + str(scores))
+            self.output_str("Total points: " + str(total_points))
+            self.output_str(" " + str(mislabeled))
 
 
     """
@@ -265,8 +280,8 @@ class Root(FloatLayout):
 
     def show_nbn(self):
         if self.loaded:
-            ypred,output,log_proba = nbn.naivebayesian(data)
-            self.output_str(ypred)
+            output,log_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI)
+            #self.output_str(ypred)
             self.output_str(output)
             self.output_str(log_proba)
             self.feedback("Succesfully made a NBN.")
@@ -292,6 +307,9 @@ class Root(FloatLayout):
     """
     def feedback(self,feedback):
         self.output_console =  "Console: " + feedback
+
+    def Clock_feedback(self, dt, feedback):
+        self.output_console = "Console: " + str(feedback)
 
     """
     load() shows a file browser to find an appropriate data set (csv format).
