@@ -108,7 +108,6 @@ class Root(FloatLayout):
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
         """ Set up logging """
-        self._log_started = False
         self.output_text = ""
         """
         Open Settings first time, needed a delay in order to wait for everything to be properly set.
@@ -148,6 +147,12 @@ class Root(FloatLayout):
         self._popup = Popup(title="Split data", content=content, size_hint=(0.9,0.9))
         self._popup.open()
 
+    """
+
+    Updates the variables on the top.
+
+    """
+
     def update_overview(self, data_loaded = 0, fname = 0, trainrows = 0, testrows=0, ncols = 0, best_score = False):
         if not data_loaded == 0:
             self.dataOverview['data_loaded'] = data_loaded
@@ -162,6 +167,12 @@ class Root(FloatLayout):
         if not best_score == False:
             self.dataOverview['best_score'] = best_score
         self._update_overviewGUI()
+
+    """
+
+    Pushes the updates so the GUI gets the latest information.
+
+    """
 
     def _update_overviewGUI(self):
         self.data_loaded = str(self.dataOverview['data_loaded'])
@@ -211,13 +222,6 @@ class Root(FloatLayout):
     Save Settings. Called when closing the settings_popup.
     """
     def settings_save(self, updated_configGeneral, updated_configle, updated_configcv, updated_configfi, updated_use_fi):
-        # Uncomment for debugging.
-        """
-        self.output_str(updated_configcv)
-        self.output_str(updated_configle)
-        self.output_str(updated_configfi)
-        self.output_str(updated_use_fi)
-        """
         # Updates the config
         self.configGeneral = updated_configGeneral
         self.configCV = updated_configcv
