@@ -1,115 +1,11 @@
 #:kivy 1.1.0
 
-<Menu@Button>:
-	
-<TitleBox@BoxLayout>:
-    size_hint_y: None
-    height: 20
-<TitleLabel@Label>:
-	markup: True
-	
-Root:
-
-    BoxLayout:
-        orientation: 'vertical'
-		TitleBox:
-			TitleLabel:
-				text: "[b]Main [color=09B9E5]Menu[/color][/b]"
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Menu:
-                text: 'Load'
-                on_release: root.show_load()
-            Menu:
-                text: 'Save'
-                on_release: root.show_save()
-			Menu:
-				text: 'Label Encode'
-				on_release: root.label_encode()
-			Menu:
-				text: 'Split Data (train/test)'
-				on_release: root.split_data()
-			Menu:
-				text: 'Settings'
-				on_release: root.show_settings()
-		TitleBox:
-			TitleLabel:
-				text: "[b]Model [color=09B9E5]Selection[/color][/b]"
-		BoxLayout:
-            size_hint_y: None
-            height: 30
-            Menu:
-				text: 'Feature Imp.'
-				on_release: root.show_feature_importance()
-            Menu:
-                text: 'RandomForest'
-				on_release: root.show_randomforest()
-			Menu:
-				text: 'Naive Bayesian Net.'
-				on_release: root.show_nbn()
-			Menu:
-				text: 'QuickLoad'
-				on_release: root.debug_quick_load()
-			Menu:
-                text: "Reset Settings"
-				on_release: root.initialiseSettings()
-        BoxLayout:
-            RstDocument:
-                text: root.output_text
-                show_errors: False
-		BoxLayout
-			size_hint: 1, 0.1
-			RstDocument:
-				id: console
-				text: root.output_console
-
-<LoadDialog>:
-    BoxLayout:
-        size: root.size
-        pos: root.pos
-        orientation: "vertical"
-        FileChooserListView:
-            id: filechooser
-
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Button:
-                text: "Cancel"
-                on_release: root.cancel()
-
-            Button:
-                text: "Load"
-                on_release: root.load(filechooser.path, filechooser.selection)
-
-<SaveDialog>:
-    text_input: text_input
-
-    BoxLayout:
-        size: root.size
-        pos: root.pos
-        orientation: "vertical"
-        FileChooserListView:
-            id: filechooser
-            on_selection: text_input.text = self.selection[0] or ''
-
-        TextInput:
-            id: text_input
-            size_hint_y: None
-            height: 30
-            multiline: False
-
-        BoxLayout:
-            size_hint_y: None
-            height: 30
-            Button:
-                text: "Cancel"
-                on_release: root.cancel()
-
-            Button:
-                text: "Save"
-                on_release: root.save(filechooser.path,text_input.text)
+####################################
+#
+#
+#
+#
+####################################
 
 <SetBox@BoxLayout>:
 	# Added pos_hint: {'top': 1} and removed size_hint_y: None in order to fit the screen better.
@@ -164,8 +60,237 @@ Root:
 		Rectangle: 
 			pos: self.pos 
 			size: self.size	
+##
+##
+##
+
+<Menu@Button>:
+	height: 25
+	size_hint_y: None
+<SideBox@BoxLayout>:
+	anchor_x: 'left'
+	anchor_y: 'top'
+    height: 20
+	size_hint_y: None
+
+<SideMenu@Button>:
+    height: 25
+	size_hint_y: None
 	
+<TitleBox@BoxLayout>:
+    size_hint_y: None
+    height: 20
+	
+<TitleLabel@Label>:
+	markup: True
+
+<VarValue@Label>:
+	markup: True
+	halign: 'left'
+    valign: 'middle'
+	text_size: self.size
+	canvas.before: 
+		Color: 
+			rgb: 0, 0, 0 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size		
+<VarLabel@Label>:
+	markup: True
+	halign: 'right'
+    valign: 'middle'
+	text_size: self.size
+	canvas.before: 
+		Color: 
+			rgb: 0, 0, 0 
+		Rectangle: 
+			pos: self.pos 
+			size: self.size	
+	
+Root:
+    BoxLayout:
+        orientation: 'horizontal'
+		anchor_x: 'left'
+		anchor_y: 'top'
+		BoxLayout:
+			orientation: 'vertical'
+			size_hint: .2, 1
+			#pos_hint: {'y': 0.9}
+			#pos_hint_y: 'top'
+			SideBox:
+				TitleLabel:
+					text: "[b]Import [color=09B9E5]Data[/color][/b]"
+			SideMenu:
+				text: 'Load'
+				on_release: root.show_load()
+			SideMenu:	
+				text: 'Save'
+				on_release: root.show_save()
+			SideBox:
+				TitleLabel:
+					text: "[b]Pre [color=09B9E5]Processing[/color][/b]"
+			SideMenu:
+				text: 'Label Encode'
+				on_release: root.label_encode()
+			SideMenu:
+				text: 'Split Data (train/test)'
+				on_release: root.split_data()
+			SideBox:
+				TitleLabel:
+					text: "[b]Data [color=09B9E5]Analysis[/color][/b]"
+			SideMenu:
+				text: 'Descriptive Statistics'
+				on_release: root.feedback('To be implemented.')
+			SideMenu:
+				text: 'Variable Correlations'
+				on_release: root.feedback('To be implemented.')
+			SideMenu:	
+				text: 'Feature Imp.'
+				on_release: root.show_feature_importance()
+			SideBox:
+				TitleLabel:
+					text: "[b]Create [color=09B9E5]Model[/color][/b]"
+			SideMenu:	
+				text: 'Naive Bayesian Net.'
+				on_release: root.show_nbn()
+			SideMenu:	
+				text: 'RandomForest'
+				on_release: root.show_randomforest()
+			SideBox:
+				TitleLabel:
+					text: "[b]Experimental [color=09B9E5]Functions[/color][/b]"
+			SideMenu:	
+				text: 'Exp QuickLoad()'
+				on_release: root.exp_quick_load()
+			SideMenu:	
+				text: 'Exp QuickLoad()'
+				on_release: root.exp_quick_load()
+			BoxLayout:
 				
+		BoxLayout:
+			orientation: 'vertical'
+			size_hint: .8, 1
+			TitleBox:
+				TitleLabel:
+					text: "[b]Data [color=09B9E5]Overview[/color][/b]"
+			BoxLayout:
+				orientation: "horizontal"
+				size_hint_y: None
+				height: 50
+				BoxLayout:
+					size_hint: .8, 1
+					orientation: "horizontal"
+					BoxLayout:
+						orientation: "vertical"
+						SetBox:
+							# self.dataOverview = {'data_loaded': False, 'fname': 'none', 'nrows': 0, 'ncols': 0, 'best_score': 0}
+							VarLabel:
+								text: "[b]Data Loaded:[/b]"
+							VarValue:
+								id: data_loaded
+								text: root.data_loaded #str(root.dataOverview['data_loaded'])
+								# str(root.configCV['seed'])
+						SetBox:
+							VarLabel:
+								text: "[b]File Name:[/b]"
+							VarValue:
+								id: fname
+								text: root.fname #str(root.dataOverview['fname'])
+					BoxLayout:
+						orientation: "vertical"
+						SetBox:
+							VarLabel:
+								text: "[b]Train Rows:[/b]"
+							VarValue:
+								text: root.trainrows #str(root.dataOverview['trainrows'])
+								# str(root.configCV['seed'])
+						SetBox:
+							VarLabel:
+								text: "[b]Test Rows:[/b]"
+							VarValue:
+								text: root.testrows #str(root.dataOverview['testrows'])
+								# str(root.configCV['seed'])
+					BoxLayout:
+						orientation: "vertical"
+						SetBox:
+							VarLabel:
+								text: "[b]Columns:[/b]"
+							VarValue:
+								text: root.ncols # str(root.dataOverview['ncols'])
+								# str(root.configCV['seed'])
+						SetBox:
+							VarLabel:
+								text: "[b]Best Score:[/b]"
+							VarValue:
+								text: root.best_score #str(root.dataOverview['best_score'])
+				BoxLayout:
+					orientation: "vertical"
+					size_hint_y: None
+					size_hint: .2, 1
+					Menu:
+						text: 'Settings'
+						on_release: root.show_settings()
+					Menu:
+						text: 'Reset Settings'
+						on_release: root.initialiseSettings()
+			
+			BoxLayout:
+				RstDocument:
+					text: root.output_text
+					show_errors: False
+	BoxLayout
+		size_hint: 1, 0.1
+		RstDocument:
+			text: root.output_console
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
+
+<SaveDialog>:
+    text_input: text_input
+
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            on_selection: text_input.text = self.selection[0] or ''
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.save(filechooser.path,text_input.text)
+
+
 <Settings>:
     BoxLayout:
         size: root.size
@@ -185,22 +310,30 @@ Root:
 			SetDesc:
 				text: "Show and save descriptive statistics when loading new data set."
 		SetBox:
+			SetLabel:
+				text: "Output Folder"
+			SetText:
+				id: workdir
+				text: str(root.newconfigGeneral['workdir'])
+			SetDesc:
+				text: "Define your (existing) work directory. Please end with backslash."
+		SetBox:
 			SetCategory:
 				text: "Label [color=09B9E5]Encoding[/color]"
 		SetBox:
 			size_hint_y: None
-			height: 100
+			height: 70
 			SetLabel:
 				text: "Columns To Encode"
-				height: 100
+				height: 70
 			SetText:
 				id: le_columns
 				text: str(root.newconfigLE)
 				multiline: True
-				height: 100
+				height: 70
 			SetDesc:
 				text: "The columns to be encoded."
-				height: 100
+				height: 70
 		SetBox:
 			SetCategory:
 				text: "Split [color=09B9E5]Data[/color]"
@@ -240,7 +373,7 @@ Root:
 				text: "On: random seed. Off: use seed entered."
 		SetBox:
 			SetCategory:
-				text: "Feature [color=09B9E5]Importance[/color]"
+				text: "Drop [color=09B9E5]Features[/color]"
 				
 		SetBox:
 			SetLabel:
@@ -249,7 +382,7 @@ Root:
 				id: feature_importance
 				text: str(root.newconfigFI)
 			SetDesc:
-				text: "Set a list of columns to exclude in feature importance."
+				text: "Set a list of columns to exclude in feature importance and model creation."
 		SetBox:
 			SetLabel:
 				text: "Apply List of Columns"
@@ -270,4 +403,4 @@ Root:
 				
             Button:
                 text: "Apply Settings"
-                on_release: root.settings_save(root.saveGeneral(desc_stats_on_load.active),root.saveLE(le_columns.text), root.saveCV(target_value.text, test_set_size.text, seed.text,random_state.active), root.saveFI(feature_importance.text), root.saveFIUse(apply_LE_list.active))
+                on_release: root.settings_save(root.saveGeneral(desc_stats_on_load.active,workdir.text),root.saveLE(le_columns.text), root.saveCV(target_value.text, test_set_size.text, seed.text,random_state.active), root.saveFI(feature_importance.text), root.saveFIUse(apply_LE_list.active))

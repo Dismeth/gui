@@ -111,12 +111,12 @@ class DataSet():
 
     def information(self):
         if self.loaded:
-            a = list(self.X_train.columns.values)
-            b = list(self.X_test.columns.values)
+            a = list(self.dataset.columns.values)
+            #b = list(self.X_test.columns.values)
             #c = self.X_test.columns.values.tolist()
-            return (a,b)
+            return a
         else:
-            return 1
+            return 0
 
     def correlation(self):
         # TO DO: add removal of corr. data

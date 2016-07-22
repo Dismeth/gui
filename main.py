@@ -18,6 +18,7 @@ import datetime
 import time
 import timeit
 import pandas as pd
+import os
 
 
 class LoadDialog(FloatLayout):
@@ -47,8 +48,9 @@ class Settings(FloatLayout):
     """
     Functions to save all the settings from the settings window.
     """
-    def saveGeneral(self, desc_stats_on_load):
+    def saveGeneral(self, desc_stats_on_load, workdir):
         self.newconfigGeneral['desc_stats_on_load'] = bool(desc_stats_on_load)
+        self.newconfigGeneral['workdir'] = str(workdir)
         return self.newconfigGeneral
 
     def saveLE(self,le_columns):
@@ -75,15 +77,24 @@ class Root(FloatLayout):
     savefile = ObjectProperty(None)
     splitfile = ObjectProperty(None)
     text_input = ObjectProperty(None)
+    # Define variables to be updated
     output_console = StringProperty(None)
     output_text = StringProperty(None)
+    # Overview variables that need to be updated:
+    data_loaded = StringProperty(None)
+    fname = StringProperty(None)
+    trainrows = StringProperty(None)
+    testrows = StringProperty(None)
+    ncols = StringProperty(None)
+    best_score = StringProperty(None)
 
     def initialiseSettings(self):
-        self.configGeneral = {'desc_stats_on_load': True,'target_value': 'target_purchase'}
+        self.configGeneral = {'desc_stats_on_load': True,'workdir': 'D:\workdir\\'}
         self.configCV = {'target_value': 'target_purchase', 'test_set_size': 0.4, 'seed': 16, 'random_state_is': True}
         self.configLE = ['C2', 'C4', 'C5', 'C6', 'C9', 'C11', 'C13', 'C15', 'C16', 'C17', 'C19', 'C20', 'C21', 'C22', 'C28', 'C30', 'C53', 'C60']
         self.configFI = ['C2'] #example columns to exclude
         self.configFIUse = False # This has been updated.. Need to figure out how to control this one. (because record_ID and target_purchase is included.)
+        self.dataOverview = {'data_loaded': False, 'fname': 'N/A', 'trainrows': 0, 'testrows': 0,'ncols': 0, 'best_score': 0}
         self.feedback("Settings has been reset.")
 
     def __init__(self,**kwargs):
@@ -91,10 +102,13 @@ class Root(FloatLayout):
         """ Global variables to be edited in the settings """
         self.loaded = False
         self.initialiseSettings()
+        self._update_overviewGUI()
         """ Welcome message etc """
         version = 0.3
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
+        """ Set up logging """
+        self._log_started = False
         self.output_text = ""
         """
         Open Settings first time, needed a delay in order to wait for everything to be properly set.
@@ -133,6 +147,29 @@ class Root(FloatLayout):
         content = SplitData(split=self.split_data, cancel=self.dismiss_popup)
         self._popup = Popup(title="Split data", content=content, size_hint=(0.9,0.9))
         self._popup.open()
+
+    def update_overview(self, data_loaded = 0, fname = 0, trainrows = 0, testrows=0, ncols = 0, best_score = False):
+        if not data_loaded == 0:
+            self.dataOverview['data_loaded'] = data_loaded
+        if not fname == 0:
+            self.dataOverview['fname'] = fname
+        if not trainrows == 0:
+            self.dataOverview['trainrows'] = trainrows
+        if not testrows == 0:
+            self.dataOverview['testrows'] = testrows
+        if not ncols == 0:
+            self.dataOverview['ncols'] = ncols
+        if not best_score == False:
+            self.dataOverview['best_score'] = best_score
+        self._update_overviewGUI()
+
+    def _update_overviewGUI(self):
+        self.data_loaded = str(self.dataOverview['data_loaded'])
+        self.fname = str(self.dataOverview['fname'])
+        self.trainrows = str(self.dataOverview['trainrows'])
+        self.testrows = str(self.dataOverview['testrows'])
+        self.ncols = str(self.dataOverview['ncols'])
+        self.best_score = str(self.dataOverview['best_score'])
 
     """
     Transforms a list used as a configuration to a string, in order to be easilier edited using semicolon as a splitter.
@@ -200,10 +237,10 @@ class Root(FloatLayout):
         self.dismiss_popup()
 
     """
-    Testfunction to test new features.
+    Experimental Function to test new features.
     """
 
-    def debug_quick_load(self):
+    def exp_quick_load(self):
         #"""
         data = DataSet()
         self.quick = DataSet()
@@ -239,6 +276,9 @@ class Root(FloatLayout):
         print(pd.crosstab(df['Var1'], df['Var2']))
 
 
+    """
+    Build a RandomForest classifier and return feature importances.
+    """
     def show_feature_importance(self):
         if self.loaded:
             randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
@@ -275,8 +315,15 @@ class Root(FloatLayout):
             data.split(target_column_name = self.configCV['target_value'], test_set_size = self.configCV['test_set_size'], seed = self.configCV['seed'], random_state_is = self.configCV['random_state_is'])
             self.output_str("Finished splitting the data.")
             self.feedback("Succesfully split the data.")
+            self.update_overview(trainrows=len(data.X_train),testrows=len(data.X_test))
         else:
             self.feedback("Please load a dataset.")
+
+    """
+
+    Create a Naive Bayesian Network Model
+
+    """
 
     def show_nbn(self):
         if self.loaded:
@@ -295,12 +342,22 @@ class Root(FloatLayout):
 
     """
     output_str() is used for module/model output such as training error etc.
+
     """
     def output_str(self,output):
         ts = time.time()
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         self.output_text = str(self.output_text) + str(st) + ": " + str(output)
         self.output_text += "\r \n"
+
+        # Logging is done here.
+        enable_logging = True
+        if enable_logging:
+            workfile = str(self.configGeneral['workdir']) + "output.log"
+            with open(workfile, 'a') as f:
+                to_log_file = str(st) + ": " + str(output) + "\r \n"
+                f.write(to_log_file)
+                f.close()
 
     """
     feedback() is used for simple feedback to the user such as finished loading data set etc.
@@ -331,6 +388,12 @@ class Root(FloatLayout):
         if self.configGeneral['desc_stats_on_load']:
             data.descstats(self.configLE)
             self.output_str("Descriptive statistics performed.")
+        ncols = len(data.information())
+        # Get the filename and cut it to fit the GUI..
+        # Filename only used to remind the user of which dataset has been loaded.
+        head, tail = os.path.split(filename[0])
+        fname = tail[:5]+ "." + tail[-4:]
+        self.update_overview(data_loaded=self.loaded,fname=fname,ncols=ncols)
         self.dismiss_popup()
 
     """
