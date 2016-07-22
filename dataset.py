@@ -161,7 +161,7 @@ class DataSet():
             pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")
             return correlation_list, descstats_list
 
-    def descstats(self,columns_to_exclude = ['record_ID','target_purchase']):
+    def descstats(self,columns_to_exclude = ['record_ID','target_purchase'],write = False,workdir = 'C:\\'):
         if self.loaded:
             data = self.dataset
             descstats_list = pd.DataFrame(columns=['Var', 'Mean', 'SumOfValues', 'Minimum', 'Maximum', 'Count', 'Std'])
@@ -171,6 +171,8 @@ class DataSet():
                 else:
                     var = data[column_a]
                     descstats_list.loc[i] = [column_a, var.mean(), var.sum(), var.min(), var.max(), var.count(), var.std()]
-            fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
-            pd.DataFrame.to_csv(descstats_list, fileloc + "DescStats.csv")
+            if write:
+                filename = "DescStats.csv"
+                fileloc = workdir + filename
+                pd.DataFrame.to_csv(descstats_list, fileloc)
             return descstats_list

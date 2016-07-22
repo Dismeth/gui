@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fb60ad1c-12e9-45af-8f5d-347a3fb03d74" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dataset.py" afterPath="$PROJECT_DIR$/dataset.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/editor.kv" afterPath="$PROJECT_DIR$/editor.kv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <ignored path="gui.iws" />
@@ -27,8 +29,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="857">
-              <caret line="420" column="38" selection-start-line="420" selection-start-column="38" selection-end-line="420" selection-end-column="38" />
+            <state relative-caret-position="422">
+              <caret line="351" column="38" selection-start-line="351" selection-start-column="38" selection-end-line="351" selection-end-column="38" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
               </folding>
@@ -85,8 +87,8 @@
       <file leaf-file-name="dataset.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataset.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="714">
-              <caret line="118" column="20" selection-start-line="118" selection-start-column="20" selection-end-line="118" selection-end-column="20" />
+            <state relative-caret-position="780">
+              <caret line="168" column="50" selection-start-line="168" selection-start-column="50" selection-end-line="168" selection-end-column="50" />
               <folding>
                 <element signature="e#151#211#0" expanded="true" />
               </folding>
@@ -608,7 +610,14 @@
       <option name="project" value="LOCAL" />
       <updated>1469202812869</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Version 0.4. New layout! +logging, variable overview and workdir.">
+      <created>1469203032340</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1469203032340</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1107,8 +1116,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dataset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
-          <caret line="118" column="20" selection-start-line="118" selection-start-column="20" selection-end-line="118" selection-end-column="20" />
+        <state relative-caret-position="780">
+          <caret line="168" column="50" selection-start-line="168" selection-start-column="50" selection-end-line="168" selection-end-column="50" />
           <folding>
             <element signature="e#151#211#0" expanded="true" />
           </folding>
@@ -1117,8 +1126,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="857">
-          <caret line="420" column="38" selection-start-line="420" selection-start-column="38" selection-end-line="420" selection-end-column="38" />
+        <state relative-caret-position="422">
+          <caret line="351" column="38" selection-start-line="351" selection-start-column="38" selection-end-line="351" selection-end-column="38" />
           <folding>
             <element signature="e#0#24#0" expanded="true" />
           </folding>

@@ -104,7 +104,7 @@ class Root(FloatLayout):
         self.initialiseSettings()
         self._update_overviewGUI()
         """ Welcome message etc """
-        version = 0.3
+        version = 0.4
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
         """ Set up logging """
@@ -114,9 +114,16 @@ class Root(FloatLayout):
         """
         Clock.schedule_once(self.show_startup_settings, 1)
 
+    """
+    Function to dismiss the popups (Settings, Load and Save)
+    """
 
     def dismiss_popup(self):
         self._popup.dismiss()
+
+    """
+    show_load(): The function called in the menu. Shows the popup.
+    """
 
     def show_load(self):
         content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
@@ -124,28 +131,55 @@ class Root(FloatLayout):
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
+    """
+    show_save(): The function called in the menu. Shows the popup.
+    """
+
     def show_save(self):
         content = SaveDialog(save=self.save, cancel=self.dismiss_popup)
         self._popup = Popup(title="Save file", content=content,
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
-    def label_encode(self):
-        if self.loaded:
-            #Clock.schedule_once(lambda dt: self.feedback("Start label encoded the data."), -1)
-            self.output_str("Start label encoded the data.")
-            data.labelencode(columns=self.configLE)
-            self.output_str("End label encoded the data.")
-            self.feedback("Succesfully label encoded the data.")
+    """
+    load() shows a file browser to find an appropriate data set (csv format).
+    """
+    def load(self, path, filename):
+        global last_path
+        global last_filename
+        global data
+        last_path = path
+        last_filename  = filename[0]
+        try:
+            data = DataSet()
+            data.dataimport(filename[0])
+            self.loaded = True
+        except (RuntimeError, TypeError, NameError):
+            data.dprint("Error: most likely not a csv file.")
+        self.output_str("Successfully loaded the data set.")
+        self.feedback("Fileimport completed")
+        if self.configGeneral['desc_stats_on_load']:
+            data.descstats(self.configLE)
+            self.output_str("Descriptive statistics performed.")
+        ncols = len(data.information())
+        # Get the filename and cut it to fit the GUI..
+        # Filename only used to remind the user of which dataset has been loaded.
+        head, tail = os.path.split(filename[0])
+        fname = tail[:5]+ "." + tail[-4:]
+        self.update_overview(data_loaded=self.loaded,fname=fname,ncols=ncols)
+        self.dismiss_popup()
+
+    """
+    save() need to fix this one. Ultimately dataset.save_file(dataset,path)
+    """
+    def save(self, path, filename):
+        if not self.loaded:
+            self.feedback("You have nothing to save.")
         else:
-            self.feedback("Please load a dataset.")
-
-    """ Obsolete, all settings are made in settings-popup. """
-
-    def show_split_data(self):
-        content = SplitData(split=self.split_data, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Split data", content=content, size_hint=(0.9,0.9))
-        self._popup.open()
+            filepath = str(path) + '\\' + str(filename)
+            data.dprint(str(filepath))
+            data.save_file(str(path),str(filename))
+        self.dismiss_popup()
 
     """
 
@@ -153,9 +187,8 @@ class Root(FloatLayout):
 
     """
 
-    def update_overview(self, data_loaded = 0, fname = 0, trainrows = 0, testrows=0, ncols = 0, best_score = False):
-        if not data_loaded == 0:
-            self.dataOverview['data_loaded'] = data_loaded
+    def update_overview(self, fname = 0, trainrows = 0, testrows=0, ncols = 0, best_score = False):
+        self.dataOverview['data_loaded'] = self.loaded
         if not fname == 0:
             self.dataOverview['fname'] = fname
         if not trainrows == 0:
@@ -241,49 +274,46 @@ class Root(FloatLayout):
         self.dismiss_popup()
 
     """
-    Experimental Function to test new features.
+
+    Now settings have been initialised and the popup-overhead is done.
+    This is vere the data pre-processing, analysing and model generation starts.
+
+    -----------
+    Label Encodes (categorical variables are converted to numerical values) the data set.
     """
 
-    def exp_quick_load(self):
-        #"""
-        data = DataSet()
-        self.quick = DataSet()
-        data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
-        data.labelencode(columns=self.configLE)
-        xtest, xtrain, ytest, ytrain = data.split(quick=True)
-        self.quick.import_split(xtest, xtrain, ytest, ytrain)
-        self.output_str("10 percent of original dataset loaded (into train. Testset is 90 percent).")
-        rows_train = len(xtrain)
-        self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
-        correlation_list, descstats = self.quick.correlation()
-        #print(test)
-        #a = test.sort_values(by='Correlation', ascending=True).head(20)
-        #b = test.sort_values(by='Correlation',ascending=False).head(20)
-        #print(a)
-        #print(b)
-        #print(descstats)
-        #self.quick.descstats()
-        #"""
-        #Clock.schedule_once(lambda dt: self.feedback("this is good"), -1)
-        #descstats = data.descstats(self.configLE)
-        ############################################################
-        # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
-        # Might be easier (and is shorter) to read by developers as an in house var name.
-        threshold = 0.7
-        df = correlation_list[correlation_list['Correlation'] > threshold]
-        df = df.sort_values(by='Correlation',ascending=False)
-        column_a_b = df['Var1']
-        column_a_b = column_a_b.append(df['Var2'])
-        print(df[df['Var1'] == 'C31'])
-        print(column_a_b.value_counts())
-        #print(df.head(10))
-        print(pd.crosstab(df['Var1'], df['Var2']))
+    def menu_label_encode(self):
+        if self.loaded:
+            #Clock.schedule_once(lambda dt: self.feedback("Start label encoded the data."), -1)
+            self.output_str("Start label encoded the data.")
+            data.labelencode(columns=self.configLE)
+            self.output_str("End label encoded the data.")
+            self.feedback("Succesfully label encoded the data.")
+        else:
+            self.feedback("Please load a dataset.")
+
+
+
+    """
+    function split_data(): splits the data into a training set and validation set with user's options.
+    """
+    def menu_split_data(self):
+        if self.loaded:
+            self.output_str("Start splitting the data.")
+            data.split(target_column_name = self.configCV['target_value'], test_set_size = self.configCV['test_set_size'], seed = self.configCV['seed'], random_state_is = self.configCV['random_state_is'])
+            self.output_str("Finished splitting the data.")
+            self.feedback("Succesfully split the data.")
+            self.update_overview(trainrows=len(data.X_train),testrows=len(data.X_test),ncols=len(data.X_train.columns.values))
+        else:
+            self.feedback("Please load a dataset.")
+
+
 
 
     """
     Build a RandomForest classifier and return feature importances.
     """
-    def show_feature_importance(self):
+    def menu_feature_importance(self):
         if self.loaded:
             randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
         elif self.quick.exists():
@@ -291,11 +321,45 @@ class Root(FloatLayout):
         else:
             self.feedback("Please load a dataset.")
 
+
+
+
+    """
+    Descriptive Statistics
+    """
+
+    def menu_descriptive_statistics(self):
+        self.feedback('Desc Correlation.')
+
+    """
+    Variable Correlations
+    """
+    def menu_var_corr(self):
+        self.feedback('Variable Correlation.')
+
+
+    """
+
+    Create a Naive Bayesian Network Model
+
+    """
+
+    def menu_nbn(self):
+        if self.loaded:
+            output,log_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI)
+            #self.output_str(ypred)
+            self.output_str(output)
+            self.output_str(log_proba)
+            self.feedback("Succesfully made a NBN. FIKS LOG PROBA!!!")
+            self.update_overview(best_score=float(log_proba))
+        else:
+            self.feedback("Please load a dataset.")
+
     """
     Build a RandomForest classifier.
     """
 
-    def show_randomforest(self):
+    def menu_randomforest(self):
         if self.loaded:
             scores, total_points, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
             loaded = True
@@ -308,37 +372,7 @@ class Root(FloatLayout):
             self.output_str("Mean Score: " + str(scores))
             self.output_str("Total points: " + str(total_points))
             self.output_str(" " + str(mislabeled))
-
-
-    """
-    function split_data(): splits the data into a training set and validation set with user's options.
-    """
-    def split_data(self):
-        if self.loaded:
-            self.output_str("Start splitting the data.")
-            data.split(target_column_name = self.configCV['target_value'], test_set_size = self.configCV['test_set_size'], seed = self.configCV['seed'], random_state_is = self.configCV['random_state_is'])
-            self.output_str("Finished splitting the data.")
-            self.feedback("Succesfully split the data.")
-            self.update_overview(trainrows=len(data.X_train),testrows=len(data.X_test))
-        else:
-            self.feedback("Please load a dataset.")
-
-    """
-
-    Create a Naive Bayesian Network Model
-
-    """
-
-    def show_nbn(self):
-        if self.loaded:
-            output,log_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI)
-            #self.output_str(ypred)
-            self.output_str(output)
-            self.output_str(log_proba)
-            self.feedback("Succesfully made a NBN.")
-        else:
-            self.feedback("Please load a dataset.")
-
+            self.update_overview(best_score=scores)
 
 
     def console(self):
@@ -372,45 +406,67 @@ class Root(FloatLayout):
     def Clock_feedback(self, dt, feedback):
         self.output_console = "Console: " + str(feedback)
 
-    """
-    load() shows a file browser to find an appropriate data set (csv format).
-    """
-    def load(self, path, filename):
-        global last_path
-        global last_filename
-        global data
-        last_path = path
-        last_filename  = filename[0]
-        try:
-            data = DataSet()
-            data.dataimport(filename[0])
-            self.loaded = True
-        except (RuntimeError, TypeError, NameError):
-            data.dprint("Error: most likely not a csv file.")
-        self.output_str("Successfully loaded the data set.")
-        self.feedback("Fileimport completed")
-        if self.configGeneral['desc_stats_on_load']:
-            data.descstats(self.configLE)
-            self.output_str("Descriptive statistics performed.")
-        ncols = len(data.information())
-        # Get the filename and cut it to fit the GUI..
-        # Filename only used to remind the user of which dataset has been loaded.
-        head, tail = os.path.split(filename[0])
-        fname = tail[:5]+ "." + tail[-4:]
-        self.update_overview(data_loaded=self.loaded,fname=fname,ncols=ncols)
-        self.dismiss_popup()
 
     """
-    save() need to fix this one. Ultimately dataset.save_file(dataset,path)
+    Function exp_quick_load() quickly loads the data and splits it into a small training set.
     """
-    def save(self, path, filename):
-        if not self.loaded:
-            self.feedback("You have nothing to save.")
-        else:
-            filepath = str(path) + '\\' + str(filename)
-            data.dprint(str(filepath))
-            data.save_file(str(path),str(filename))
-        self.dismiss_popup()
+
+    def exp_quick_load(self):
+        self.output_str("Import.")
+        global data
+        data = DataSet()
+        data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
+        self.loaded = True
+        self.output_str("Label Encode.")
+        data.labelencode(columns=self.configLE)
+        self.output_str("Split (quick = True).")
+        data.split(target_column_name=self.configCV['target_value'], test_set_size=self.configCV['test_set_size'],
+                   seed=self.configCV['seed'], random_state_is=self.configCV['random_state_is'],quick=True)
+        self.update_overview(trainrows=len(data.X_train), testrows=len(data.X_test),
+                             ncols=len(data.X_train.columns.values))
+        self.output_str("Function 'exp_quick_load()' finished running.")
+        data.descstats(self.configLE,write=True,workdir=self.configGeneral['workdir'])
+
+
+
+    """
+    Experimental Function to test new features.
+    """
+
+    def exp_(self):
+        #"""
+        data = DataSet()
+        self.quick = DataSet()
+        data.dataimport("D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\InnoCentive_Challenge_9933493_training_data.csv")
+        data.labelencode(columns=self.configLE)
+        xtest, xtrain, ytest, ytrain = data.split(quick=True)
+        self.quick.import_split(xtest, xtrain, ytest, ytrain)
+        self.output_str("10 percent of original dataset loaded (into train. Testset is 90 percent).")
+        rows_train = len(xtrain)
+        self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
+        correlation_list, descstats = self.quick.correlation()
+        #print(test)
+        #a = test.sort_values(by='Correlation', ascending=True).head(20)
+        #b = test.sort_values(by='Correlation',ascending=False).head(20)
+        #print(a)
+        #print(b)
+        #print(descstats)
+        #self.quick.descstats()
+        #"""
+        #Clock.schedule_once(lambda dt: self.feedback("this is good"), -1)
+        #descstats = data.descstats(self.configLE)
+        ############################################################
+        # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
+        # Might be easier (and is shorter) to read by developers as an in house var name.
+        threshold = 0.7
+        df = correlation_list[correlation_list['Correlation'] > threshold]
+        df = df.sort_values(by='Correlation',ascending=False)
+        column_a_b = df['Var1']
+        column_a_b = column_a_b.append(df['Var2'])
+        print(df[df['Var1'] == 'C31'])
+        print(column_a_b.value_counts())
+        #print(df.head(10))
+        print(pd.crosstab(df['Var1'], df['Var2']))
 
 class Editor(App):
     pass

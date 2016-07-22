@@ -131,31 +131,31 @@ Root:
 					text: "[b]Pre [color=09B9E5]Processing[/color][/b]"
 			SideMenu:
 				text: 'Label Encode'
-				on_release: root.label_encode()
+				on_release: root.menu_label_encode()
 			SideMenu:
 				text: 'Split Data (train/test)'
-				on_release: root.split_data()
+				on_release: root.menu_split_data()
 			SideBox:
 				TitleLabel:
 					text: "[b]Data [color=09B9E5]Analysis[/color][/b]"
 			SideMenu:
 				text: 'Descriptive Statistics'
-				on_release: root.feedback('To be implemented.')
+				on_release: root.menu_descriptive_statistics()
 			SideMenu:
 				text: 'Variable Correlations'
-				on_release: root.feedback('To be implemented.')
+				on_release: root.menu_var_corr()
 			SideMenu:	
 				text: 'Feature Imp.'
-				on_release: root.show_feature_importance()
+				on_release: root.menu_feature_importance()
 			SideBox:
 				TitleLabel:
 					text: "[b]Create [color=09B9E5]Model[/color][/b]"
 			SideMenu:	
 				text: 'Naive Bayesian Net.'
-				on_release: root.show_nbn()
+				on_release: root.menu_nbn()
 			SideMenu:	
 				text: 'RandomForest'
-				on_release: root.show_randomforest()
+				on_release: root.menu_randomforest()
 			SideBox:
 				TitleLabel:
 					text: "[b]Experimental [color=09B9E5]Functions[/color][/b]"
