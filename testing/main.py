@@ -1,53 +1,49 @@
-from kivy.app import App
-from kivy.clock import Clock, _default_time as time  # ok, no better way to use the same clock as kivy, hmm
-from kivy.lang import Builder
-from kivy.factory import Factory
-from kivy.properties import ListProperty
+'''
+TabbedPanel
+============
 
-MAX_TIME = 1/60.
-
-kv = '''
-BoxLayout:
-    ScrollView:
-        GridLayout:
-            cols: 1
-            id: target
-            size_hint: 1, None
-            height: self.minimum_height
-    BoxLayout:
-        orientation: 'vertical'
-        Button:
-            text: 'add 10'
-            on_press: app.consommables.extend(range(10))
-        Button:
-            text: 'add 100'
-            on_press: app.consommables.extend(range(100))
-        Button:
-            text: 'add 1000'
-            on_press: app.consommables.extend(range(1000))
-        Button:
-            text: 'clear'
-            on_press: target.clear_widgets()
-<MyLabel@Label>:
-    size_hint_y: None
-    height: self.texture_size[1]
+Test of the widget TabbedPanel.
 '''
 
+from kivy.app import App
+from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.lang import Builder
 
-class ProdConApp(App):
-    consommables = ListProperty([])
+Builder.load_string("""
 
+<Test>:
+    size_hint: .5, .5
+    pos_hint: {'center_x': .5, 'center_y': .5}
+    do_default_tab: False
+
+    TabbedPanelItem:
+        text: 'first tab'
+        Label:
+            text: 'First tab content area'
+    TabbedPanelItem:
+        text: 'tab2'
+        BoxLayout:
+            Label:
+                text: 'Second tab content area'
+            Button:
+                text: 'Button that does nothing'
+    TabbedPanelItem:
+        text: 'tab3'
+        RstDocument:
+            text:
+                '\\n'.join(("Hello world", "-----------",
+                "You are in the third tab."))
+
+""")
+
+
+class Test(TabbedPanel):
+    pass
+
+
+class TabbedPanelApp(App):
     def build(self):
-        Clock.schedule_interval(self.consume, 0)
-        return Builder.load_string(kv)
-
-    def consume(self, *args):
-        while self.consommables and time() < (Clock.get_time() + MAX_TIME):
-            item = self.consommables.pop(0)  # i want the first one
-            label = Factory.MyLabel(
-                text='%s : %s : %s' % (item, Clock.get_time(), time()))
-            self.root.ids.target.add_widget(label)
-
+        return Test()
 
 if __name__ == '__main__':
-    ProdConApp().run()
+    TabbedPanelApp().run()

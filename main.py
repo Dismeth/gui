@@ -75,7 +75,7 @@ class Settings(FloatLayout):
 class Root(FloatLayout):
     loadfile = ObjectProperty(None)
     savefile = ObjectProperty(None)
-    splitfile = ObjectProperty(None)
+    #splitfile = ObjectProperty(None)
     text_input = ObjectProperty(None)
     # Define variables to be updated
     output_console = StringProperty(None)
@@ -166,7 +166,7 @@ class Root(FloatLayout):
         # Filename only used to remind the user of which dataset has been loaded.
         head, tail = os.path.split(filename[0])
         fname = tail[:5]+ "." + tail[-4:]
-        self.update_overview(data_loaded=self.loaded,fname=fname,ncols=ncols)
+        self.update_overview(fname=fname,ncols=ncols)
         self.dismiss_popup()
 
     """
@@ -277,7 +277,9 @@ class Root(FloatLayout):
 
     Now settings have been initialised and the popup-overhead is done.
     This is vere the data pre-processing, analysing and model generation starts.
+    """
 
+    """
     -----------
     Label Encodes (categorical variables are converted to numerical values) the data set.
     """

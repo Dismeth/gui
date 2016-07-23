@@ -86,12 +86,14 @@
 
 <VarValue@Label>:
 	markup: True
-	halign: 'left'
+	halign: 'center'
     valign: 'middle'
 	text_size: self.size
+	# (r, g, b, a)
+	#color: {1, 0, 0, 1}
 	canvas.before: 
 		Color: 
-			rgb: 0, 0, 0 
+			rgb: 0.15, 0.15, 0.15
 		Rectangle: 
 			pos: self.pos 
 			size: self.size		
@@ -100,9 +102,10 @@
 	halign: 'right'
     valign: 'middle'
 	text_size: self.size
+	color: 0,0.7,0.9,0.1
 	canvas.before: 
 		Color: 
-			rgb: 0, 0, 0 
+			rgb: 0.15, 0.15, 0.15
 		Rectangle: 
 			pos: self.pos 
 			size: self.size	
@@ -166,6 +169,12 @@ Root:
 				text: 'Exp QuickLoad()'
 				on_release: root.exp_quick_load()
 			BoxLayout:
+				canvas.before: 
+					Color: 
+						rgb: 0.15, 0.15, 0.15
+					Rectangle: 
+						pos: self.pos 
+						size: self.size	
 				
 		BoxLayout:
 			orientation: 'vertical'
@@ -238,10 +247,10 @@ Root:
 				RstDocument:
 					text: root.output_text
 					show_errors: False
-	BoxLayout
-		size_hint: 1, 0.1
-		RstDocument:
-			text: root.output_console
+			BoxLayout:
+				size_hint: 1, 0.1
+				RstDocument:
+					text: root.output_console
 
 <LoadDialog>:
     BoxLayout:
