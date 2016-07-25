@@ -105,7 +105,7 @@ class Root(FloatLayout):
         self.initialiseSettings()
         self._update_overviewGUI()
         """ Welcome message etc """
-        version = 0.4
+        version = 0.5
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
         self.feedback(welcome)
         """ Set up logging """
