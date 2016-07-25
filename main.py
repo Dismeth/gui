@@ -80,6 +80,7 @@ class Root(FloatLayout):
     # Define variables to be updated
     output_console = StringProperty(None)
     output_text = StringProperty(None)
+    output_label = StringProperty(None)
     # Overview variables that need to be updated:
     data_loaded = StringProperty(None)
     fname = StringProperty(None)
@@ -109,6 +110,10 @@ class Root(FloatLayout):
         self.feedback(welcome)
         """ Set up logging """
         self.output_text = ""
+        self.output_log = ""
+        self.output_last = "In depth function output is displayed here."
+        self.log_toggled = False
+        self.menu_toggle_main_output()
         """
         Open Settings first time, needed a delay in order to wait for everything to be properly set.
         """
@@ -183,7 +188,7 @@ class Root(FloatLayout):
 
     """
 
-    Updates the variables on the top.
+    Updates the variables on the dashboard (data overview).
 
     """
 
@@ -274,13 +279,24 @@ class Root(FloatLayout):
         self.dismiss_popup()
 
     """
+    Write output from functions to workdir.
+        -   Expects DataFrame.
+        -   Returns: file location.
+    """
+
+    def write_output(self,result_to_write,filename):
+        fileloc = self.configGeneral['workdir'] + filename
+        pd.DataFrame.to_csv(result_to_write, fileloc)
+        return fileloc
+
+    """
 
     Now settings have been initialised and the popup-overhead is done.
     This is vere the data pre-processing, analysing and model generation starts.
+    -----------
     """
 
     """
-    -----------
     Label Encodes (categorical variables are converted to numerical values) the data set.
     """
 
@@ -317,12 +333,12 @@ class Root(FloatLayout):
     """
     def menu_feature_importance(self):
         if self.loaded:
-            randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
-        elif self.quick.exists():
-            randomForest.feature_importance_RandomForest(self.quick, self.configFI, self.configFIUse)
+            info = randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
+            self.output_str(info)
+            location = self.write_output(info, filename='Feature-Importance.csv')
+            self.feedback("Feature importance calculated. Results written to file: " + str(location))
         else:
             self.feedback("Please load a dataset.")
-
 
 
 
@@ -331,7 +347,13 @@ class Root(FloatLayout):
     """
 
     def menu_descriptive_statistics(self):
-        self.feedback('Desc Correlation.')
+        if self.loaded:
+            desc = data.descstats(self,write=False)
+            self.output_str(desc)
+            location = self.write_output(desc, filename='Descriptive-Statistics.csv')
+            self.feedback("Descriptive statistics calculated. Results written to file: " + str(location))
+        else:
+            self.feedback('Please load a dataset.')
 
     """
     Variable Correlations
@@ -364,17 +386,13 @@ class Root(FloatLayout):
     def menu_randomforest(self):
         if self.loaded:
             scores, total_points, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
-            loaded = True
-        elif self.quick.exists():
-            scores, total_points, mislabeled = randomForest.buildRandomForest(self.quick, self.configFI, self.configFIUse)
-            loaded = True
-        else:
-            self.feedback("Please load a dataset.")
-        if loaded:
             self.output_str("Mean Score: " + str(scores))
             self.output_str("Total points: " + str(total_points))
             self.output_str(" " + str(mislabeled))
             self.update_overview(best_score=scores)
+        else:
+            self.feedback("Please load a dataset.")
+
 
 
     def console(self):
@@ -382,14 +400,12 @@ class Root(FloatLayout):
 
     """
     output_str() is used for module/model output such as training error etc.
-
     """
     def output_str(self,output):
         ts = time.time()
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        self.output_text = str(self.output_text) + str(st) + ": " + str(output)
-        self.output_text += "\r \n"
-
+        self.output_log = str(self.output_log) + str(st) + ": " + str(output)
+        self.output_log += "\r \n"
         # Logging is done here.
         enable_logging = True
         if enable_logging:
@@ -398,6 +414,13 @@ class Root(FloatLayout):
                 to_log_file = str(st) + ": " + str(output) + "\r \n"
                 f.write(to_log_file)
                 f.close()
+    """
+    output_last() is used for more extensive information rather than "label encoding finished successfully" etc.
+    """
+
+    def output_last(self, output):
+        # Get the output from a function (usually much information)
+        self.output_last = str(output)
 
     """
     feedback() is used for simple feedback to the user such as finished loading data set etc.
@@ -429,6 +452,22 @@ class Root(FloatLayout):
         self.output_str("Function 'exp_quick_load()' finished running.")
         data.descstats(self.configLE,write=True,workdir=self.configGeneral['workdir'])
 
+    """
+    Toggle main output and log
+    """
+
+    def menu_toggle_main_output(self):
+        if self.log_toggled:
+            self.output_label = "Output Log"
+            self.output_text = self.output_last
+            self.log_toggled = False
+            self.feedback("Last output shown.")
+        else:
+            self.output_label = "Last Output"
+            self.output_text = self.output_log
+            self.log_toggled = True
+            self.feedback("Output log shown.")
+
 
 
     """
@@ -447,6 +486,7 @@ class Root(FloatLayout):
         rows_train = len(xtrain)
         self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
         correlation_list, descstats = self.quick.correlation()
+        self.output_last(correlation_list)
         #print(test)
         #a = test.sort_values(by='Correlation', ascending=True).head(20)
         #b = test.sort_values(by='Correlation',ascending=False).head(20)

@@ -152,13 +152,17 @@ class DataSet():
                 var1 = df['Var1']
                 var2 = df['Var2']
                 column_a_b = [var1,var2]
+                column_a_b = column_a_b.append(df['Var2'])
+                top_vars = column_a_b.value_counts()
+                pd.crosstab(df['Var1'], df['Var2'])
 
 
-
-
-            fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
-            pd.DataFrame.to_csv(correlation_list,fileloc + "Correlations.csv")
-            pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")
+            ######
+            ###### Exporting information to CSV is done in root class.
+            ######
+            #fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
+            #pd.DataFrame.to_csv(correlation_list,fileloc + "Correlations.csv")
+            #pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")
             return correlation_list, descstats_list
 
     def descstats(self,columns_to_exclude = ['record_ID','target_purchase'],write = False,workdir = 'C:\\'):

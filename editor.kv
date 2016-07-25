@@ -166,8 +166,8 @@ Root:
 				text: 'Exp QuickLoad()'
 				on_release: root.exp_quick_load()
 			SideMenu:	
-				text: 'Exp QuickLoad()'
-				on_release: root.exp_quick_load()
+				text: root.output_label
+				on_release: root.menu_toggle_main_output()
 			BoxLayout:
 				canvas.before: 
 					Color: 
