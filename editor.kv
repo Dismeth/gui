@@ -122,13 +122,16 @@ Root:
 			#pos_hint_y: 'top'
 			SideBox:
 				TitleLabel:
-					text: "[b]Import [color=09B9E5]Data[/color][/b]"
+					text: "[b]Import /[color=09B9E5]Export[/color][/b]"
 			SideMenu:
 				text: 'Load'
 				on_release: root.show_load()
 			SideMenu:	
 				text: 'Save'
 				on_release: root.show_save()
+			SideMenu:	
+				text: 'Export To Workdir'
+				on_release: root.menu_export_small_dataset()
 			SideBox:
 				TitleLabel:
 					text: "[b]Pre [color=09B9E5]Processing[/color][/b]"
@@ -165,6 +168,15 @@ Root:
 			SideMenu:	
 				text: 'Exp QuickLoad()'
 				on_release: root.exp_quick_load()
+			SideMenu:	
+				text: 'NBN Top 10'
+				on_release: root.exp_nbn_best()
+			SideMenu:	
+				text: 'Check Plot'
+				on_release: root.menu_plot()
+			SideMenu:	
+				text: 'Greedy Feature Finder'
+				on_release: root.menu_greedyff()
 			SideMenu:	
 				text: root.output_label
 				on_release: root.menu_toggle_main_output()
@@ -247,6 +259,7 @@ Root:
 				RstDocument:
 					text: root.output_text
 					show_errors: False
+					allow_copy: True
 			BoxLayout:
 				size_hint: 1, 0.1
 				RstDocument:

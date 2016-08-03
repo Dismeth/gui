@@ -1,3 +1,6 @@
+from kivy.config import Config
+#Config.set('graphics', 'width', '1366')
+#.set('graphics', 'height', '768')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
@@ -12,6 +15,19 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.uix.switch import Switch
 from dataset import DataSet
+from greedyff import greedyFF
+#some stuff
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+from sklearn import cross_validation
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.svm import SVC
+from sklearn.datasets import load_digits
+from sklearn.learning_curve import learning_curve
+import numpy as np
+#import graphs
+#some stuff end
 import randomForest
 import nbn
 import datetime
@@ -104,20 +120,20 @@ class Root(FloatLayout):
         self.loaded = False
         self.initialiseSettings()
         self._update_overviewGUI()
-        """ Welcome message etc """
-        version = 0.5
-        welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start, or Help for more information."
-        self.feedback(welcome)
         """ Set up logging """
         self.output_text = ""
         self.output_log = ""
         self.output_last = "In depth function output is displayed here."
         self.log_toggled = False
         self.menu_toggle_main_output()
+        """ Welcome message etc """
+        version = 0.5
+        welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start."
+        self.feedback(welcome)
         """
         Open Settings first time, needed a delay in order to wait for everything to be properly set.
         """
-        Clock.schedule_once(self.show_startup_settings, 1)
+        #Clock.schedule_once(self.show_startup_settings, 1)
 
     """
     Function to dismiss the popups (Settings, Load and Save)
@@ -203,7 +219,8 @@ class Root(FloatLayout):
         if not ncols == 0:
             self.dataOverview['ncols'] = ncols
         if not best_score == False:
-            self.dataOverview['best_score'] = best_score
+            if best_score > self.dataOverview['best_score']:
+                self.dataOverview['best_score'] = best_score
         self._update_overviewGUI()
 
     """
@@ -285,15 +302,28 @@ class Root(FloatLayout):
     """
 
     def write_output(self,result_to_write,filename):
+        # filename = "SomeFileName.csv"
         fileloc = self.configGeneral['workdir'] + filename
         pd.DataFrame.to_csv(result_to_write, fileloc)
         return fileloc
+
+    """
+    Function to export 10 % of the dataset randomly, in order to analyse by hand.
+    """
+
+    def menu_export_small_dataset(self):
+        if self.loaded:
+            data.savedata(workdir=self.configGeneral['workdir'])
+            self.feedback("Randomly selected rows have been exported to workdir.")
+        else:
+            self.feedback("Please load a dataset.")
 
     """
 
     Now settings have been initialised and the popup-overhead is done.
     This is vere the data pre-processing, analysing and model generation starts.
     -----------
+    functions starting with menu_ are found on the left menu.
     """
 
     """
@@ -343,14 +373,14 @@ class Root(FloatLayout):
 
 
     """
-    Descriptive Statistics
+    Coarse Statistics
     """
 
-    def menu_descriptive_statistics(self):
+    def menu_coarse_statistics(self):
         if self.loaded:
-            desc = data.descstats(self,write=False)
+            desc = data.descstats(write=False)
             self.output_str(desc)
-            location = self.write_output(desc, filename='Descriptive-Statistics.csv')
+            location = self.write_output(desc, filename='Coarse-Statistics.csv')
             self.feedback("Descriptive statistics calculated. Results written to file: " + str(location))
         else:
             self.feedback('Please load a dataset.')
@@ -359,7 +389,46 @@ class Root(FloatLayout):
     Variable Correlations
     """
     def menu_var_corr(self):
-        self.feedback('Variable Correlation.')
+        if self.loaded:
+            correlation, descstats, df = data.correlation()
+            location = self.write_output(df,"Correlations.csv")
+            self._output_last(df)
+            column_a_b = df['Var1']
+            column_a_b = column_a_b.append(df['Var2'])
+            top_vars = column_a_b.value_counts()
+
+            string = """
+======  ======  =======  ======
+Var1    Var2     Corr    p
+            """
+            for index, row in df.iterrows():
+                string += """
+------  ------  -------  ------
+%s       %s    %0.3f    %0.1f
+                """ % (row['Var1'],row['Var2'],row['Correlation'],row['P-Value'])
+            string += """
+======  ======  =======  ======
+            """
+            self._output_last(string)
+            self.feedback("Variable correlations calculated. Results written to file: " + location)
+
+    """
+
+    Find the best features leading to a better AUC with NBN
+
+    """
+
+    def menu_greedyff(self):
+        if self.loaded:
+            greedysearch = greedyFF(data.X_train,data.y_train, verbose=1)
+            greedysearch.transform()
+            self.output_str(greedysearch.get_features())
+            greedysearch.plot()
+            self.feedback("Succesfully made a Naive Bayesian Network.")
+            # Creating the output from the function
+
+        else:
+            self.feedback("Please load a dataset.")
 
 
     """
@@ -370,12 +439,18 @@ class Root(FloatLayout):
 
     def menu_nbn(self):
         if self.loaded:
-            output,log_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI)
+            alpha = 4
+            binerize = 1.0
+            output,auc,pred_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI,alpha,binerize)
             #self.output_str(ypred)
             self.output_str(output)
-            self.output_str(log_proba)
-            self.feedback("Succesfully made a NBN. FIKS LOG PROBA!!!")
-            self.update_overview(best_score=float(log_proba))
+            self.output_str(pred_proba)
+            self.performance_report("Naive Bayesian Network",pred_proba,data.y_test)
+            self.feedback("Succesfully made a Naive Bayesian Network.")
+
+            self.update_overview(best_score=float(format(auc, '.3f')))
+            # Creating the output from the function
+
         else:
             self.feedback("Please load a dataset.")
 
@@ -385,15 +460,23 @@ class Root(FloatLayout):
 
     def menu_randomforest(self):
         if self.loaded:
-            scores, total_points, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
-            self.output_str("Mean Score: " + str(scores))
-            self.output_str("Total points: " + str(total_points))
+            auc, pred_proba, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
+            self.output_str("AUC: " + str(auc))
             self.output_str(" " + str(mislabeled))
-            self.update_overview(best_score=scores)
+            self.performance_report("Random Forest", pred_proba, data.y_test)
+            self.update_overview(best_score=float(format(auc, '.3f')))
+
         else:
             self.feedback("Please load a dataset.")
 
 
+    def performance_report(self,name,pred_proba,y):
+        from sklearn.metrics import roc_auc_score, roc_curve, log_loss, classification_report, accuracy_score
+        self.output_str(str(name) + ":")
+        self.output_str(classification_report(y, np.argmax(pred_proba, axis=1), target_names=["0", "1"]))
+        self.output_str("AUC      : %.4f" % roc_auc_score(y, pred_proba[:, 1]))
+        self.output_str("Accuracy : %.4f" % accuracy_score(y, np.argmax(pred_proba, axis=1)))
+        self.output_str("Log Loss : %.4f" % log_loss(y, pred_proba[:, 1]))
 
     def console(self):
         pass
@@ -402,8 +485,9 @@ class Root(FloatLayout):
     output_str() is used for module/model output such as training error etc.
     """
     def output_str(self,output):
+        # %Y-%m-%d
         ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        st = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
         self.output_log = str(self.output_log) + str(st) + ": " + str(output)
         self.output_log += "\r \n"
         # Logging is done here.
@@ -414,14 +498,37 @@ class Root(FloatLayout):
                 to_log_file = str(st) + ": " + str(output) + "\r \n"
                 f.write(to_log_file)
                 f.close()
-    """
-    output_last() is used for more extensive information rather than "label encoding finished successfully" etc.
-    """
+        # Need to push latest update to Kivy StringObject output_text.
+        if self.log_toggled:
+            self.output_text = self.output_log
+        else:
+            self.output_text = self.output_last
 
-    def output_last(self, output):
+    """
+    _output_last() is used for more extensive information rather than "label encoding finished successfully" etc.
+    """
+    def _output_last(self, output):
         # Get the output from a function (usually much information)
         self.output_last = str(output)
 
+        # Need to push latest update to Kivy StringObject output_text.
+        if self.log_toggled:
+            self.output_text = self.output_log
+        else:
+            self.output_text = self.output_last
+    """
+    _output_last_format(self, type, log_proba, score)
+    """
+    def _output_last_format(self, type,score,log_proba,time,classified):
+
+        output = """
+%s
+========================
+Runtime: X.X
+Number of %s
+- Log_Proba: %0.2f
+                    """ % (type,score, log_proba)
+        return output
     """
     feedback() is used for simple feedback to the user such as finished loading data set etc.
     """
@@ -452,22 +559,18 @@ class Root(FloatLayout):
         self.output_str("Function 'exp_quick_load()' finished running.")
         data.descstats(self.configLE,write=True,workdir=self.configGeneral['workdir'])
 
+
+
     """
-    Toggle main output and log
+    Experimental Function to test new features.
     """
 
-    def menu_toggle_main_output(self):
-        if self.log_toggled:
-            self.output_label = "Output Log"
-            self.output_text = self.output_last
-            self.log_toggled = False
-            self.feedback("Last output shown.")
+    def exp_nbn_best(self):
+        if self.loaded:
+            result,string = nbn.imp_topten(data,self.configFIUse,self.configFI)
+            self._output_last(string)
         else:
-            self.output_label = "Last Output"
-            self.output_text = self.output_log
-            self.log_toggled = True
-            self.feedback("Output log shown.")
-
+            self.feedback("Please load a proper data set.")
 
 
     """
@@ -486,7 +589,7 @@ class Root(FloatLayout):
         rows_train = len(xtrain)
         self.feedback("Challenge data loaded. self.quick init with " + str(rows_train) + " rows.")
         correlation_list, descstats = self.quick.correlation()
-        self.output_last(correlation_list)
+        self._output_last(correlation_list)
         #print(test)
         #a = test.sort_values(by='Correlation', ascending=True).head(20)
         #b = test.sort_values(by='Correlation',ascending=False).head(20)
@@ -509,6 +612,130 @@ class Root(FloatLayout):
         print(column_a_b.value_counts())
         #print(df.head(10))
         print(pd.crosstab(df['Var1'], df['Var2']))
+
+    """
+
+     TESTING NEW CODE
+
+    """
+
+    def menu_plot(self):
+        #digits = load_digits()
+        #X, y = digits.data, digits.target
+
+        title = "Learning Curves (Naive Bayes)"
+        # Cross validation with 100 iterations to get smoother mean test and train
+        # score curves, each time with 20% data randomly selected as a validation set.
+        #print(data.X_train.shape[0])
+        cv = cross_validation.ShuffleSplit(n=data.X_train.shape[0], n_iter=10,test_size=0.2, random_state=0)
+
+        estimator = BernoulliNB()
+        #plt = self.plot_learning_curve(estimator, title, data, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        #print(plt)
+        #title = "Learning Curves (SVM, RBF kernel, $\gamma=0.001$)"
+        # SVC is more expensive so we do a lower number of CV iterations:
+        #cv = cross_validation.ShuffleSplit(digits.data.shape[0], n_iter=10,test_size=0.2, random_state=0)
+        #estimator = SVC(gamma=0.001)
+        #graphs.plot_learning_curve(estimator, title, data, (0.7, 1.01), n_jobs=4)
+
+        #
+        ylim = None
+        n_jobs = 4
+        train_sizes = np.linspace(.1, 1.0, 5)
+
+        ds = data
+        X = ds.X_train
+        y = ds.y_train
+        plt.figure()
+        plt.title(title)
+        if ylim is not None:
+            plt.ylim(*ylim)
+        plt.xlabel("Training examples")
+        plt.ylabel("Score")
+        train_sizes, train_scores, test_scores = learning_curve(
+            estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+        train_scores_mean = np.mean(train_scores, axis=1)
+        train_scores_std = np.std(train_scores, axis=1)
+        test_scores_mean = np.mean(test_scores, axis=1)
+        test_scores_std = np.std(test_scores, axis=1)
+        plt.grid()
+        plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                         train_scores_mean + train_scores_std, alpha=0.1,
+                         color="r")
+        plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1, color="g")
+        plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+                 label="Training score")
+        plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+                 label="Cross-validation score")
+
+        plt.legend(loc="best")
+        #plt.savefig('D:\workdir\plot.png')
+        plt.show()
+
+    def menu_svm(self):
+        # Cross validation with 100 iterations to get smoother mean test and train
+        # score curves, each time with 20% data randomly selected as a validation set.
+        # print(data.X_train.shape[0])
+        cv = cross_validation.ShuffleSplit(n=data.X_train.shape[0], n_iter=10, test_size=0.2, random_state=0)
+
+        title = "Learning Curves (SVM, RBF kernel, $\gamma=0.001$)"
+
+        estimator = SVC(gamma=0.001)
+        # graphs.plot_learning_curve(estimator, title, data, (0.7, 1.01), n_jobs=4)
+        #
+        ylim = None
+        n_jobs = 4
+        train_sizes = np.linspace(.1, 1.0, 5)
+
+        ds = data
+        X = ds.X_train
+        y = ds.y_train
+        plt.figure()
+        plt.title(title)
+        if ylim is not None:
+            plt.ylim(*ylim)
+        plt.xlabel("Training examples")
+        plt.ylabel("Score")
+        train_sizes, train_scores, test_scores = learning_curve(
+            estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+        train_scores_mean = np.mean(train_scores, axis=1)
+        train_scores_std = np.std(train_scores, axis=1)
+        test_scores_mean = np.mean(test_scores, axis=1)
+        test_scores_std = np.std(test_scores, axis=1)
+        plt.grid()
+        plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                         train_scores_mean + train_scores_std, alpha=0.1,
+                         color="r")
+        plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1, color="g")
+        plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+                 label="Training score")
+        plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+                 label="Cross-validation score")
+
+        plt.legend(loc="best")
+        # plt.savefig('D:\workdir\plot.png')
+        plt.show()
+
+    """
+    END TESTING
+    """
+    """
+    Toggle main output and log
+    """
+
+    def menu_toggle_main_output(self):
+        if self.log_toggled:
+            self.output_label = "Output Log"
+            self.output_text = self.output_last
+            self.log_toggled = False
+            self.feedback("Last output shown.")
+        else:
+            self.output_label = "Last Output"
+            self.output_text = self.output_log
+            self.log_toggled = True
+            self.feedback("Output log shown.")
 
 class Editor(App):
     pass

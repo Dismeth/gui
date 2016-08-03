@@ -7,6 +7,7 @@ import pandas as pd                                 # Pandas
 from sklearn import preprocessing                   # Using label encoder to get strings (categories) into numeric values for Bayesian Network
 from sklearn import cross_validation                # K-Fold and cross validation
 from scipy.stats import pearsonr
+from sklearn.cross_validation import StratifiedShuffleSplit
 
 """
 THIS IS TEMP FOR OWN USAGE:
@@ -71,23 +72,33 @@ class DataSet():
     """
     Split the data set into a training set and validation set. It also splits it into x (input) and y (target/output).
     Req: cross_validation from sklearn.
+    Update 0.5: StratifiedShuffleSplit has been used in order to ensure the same label distribution
     """
     def split(self,target_column_name = 'target_purchase', test_set_size = 0.4, seed=16, random_state_is = True, quick = False, quick_test_size = 0.9):
         target_value = self.dataset[target_column_name]
         if quick:
             test_set_size = quick_test_size
         if random_state_is:
-            self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size)
+            #self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset, target_value, test_size=test_set_size)
+            y = self.dataset[target_column_name]
+            x = self.dataset
+            x = x.drop('record_ID', 1)
+            x = x.drop('target_purchase', 1)
+            sss = StratifiedShuffleSplit(y, 2, test_size=test_set_size)
+            for train_index, test_index in sss:
+                #print("TRAIN:", train_index, "TEST:", test_index)
+                self.X_train, self.X_test = x.iloc[train_index], x.iloc[test_index]
+                self.y_train, self.y_test = y.iloc[train_index], y.iloc[test_index]
         else:
             self.X_train, self.X_test, self.y_train, self.y_test = cross_validation.train_test_split(self.dataset,
                                                                                                      target_value,
                                                                                                      test_size=test_set_size,
                                                                                                      random_state=seed)
         # Drop the record ID and target_purchase variables. This must be generalised!
-        self.X_train = self.X_train.drop('record_ID', 1)
-        self.X_train = self.X_train.drop('target_purchase', 1)
-        self.X_test = self.X_test.drop('record_ID', 1)
-        self.X_test = self.X_test.drop('target_purchase', 1)
+        #self.X_train = self.X_train.drop('record_ID', 1)
+        #self.X_train = self.X_train.drop('target_purchase', 1)
+        #self.X_test = self.X_test.drop('record_ID', 1)
+        #self.X_test = self.X_test.drop('target_purchase', 1)
         return self.X_train, self.X_test, self.y_train, self.y_test
 
     """
@@ -118,11 +129,11 @@ class DataSet():
         else:
             return 0
 
-    def correlation(self):
+    def correlation(self,check_recommendation=True):
         # TO DO: add removal of corr. data
         # TO DO: add support for 'folder' to be used.
         self.loaded = True
-        check_recommendation = False
+        #check_recommendation = False
         if self.loaded:
             # used_columns is used to 'solve' the handshake problem. The total number of
             # items in correlation_list should be : n(n-1)/2 where n = len(self.X_train.columns.values).
@@ -146,15 +157,9 @@ class DataSet():
             if check_recommendation:
                 # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
                 # Might be easier (and is shorter) to read by developers as an in house var name.
-                threshold = 0.7
-                df = correlation_list[correlation_list['Correlation' >= threshold]]
-                df = df.sort_values(by='Correlation')
-                var1 = df['Var1']
-                var2 = df['Var2']
-                column_a_b = [var1,var2]
-                column_a_b = column_a_b.append(df['Var2'])
-                top_vars = column_a_b.value_counts()
-                pd.crosstab(df['Var1'], df['Var2'])
+                threshold = 0.8
+                df = correlation_list[correlation_list['Correlation'] >= threshold]
+                df = df.sort_values(by='Correlation',ascending=False)
 
 
             ######
@@ -163,7 +168,7 @@ class DataSet():
             #fileloc = "D:\Dropbox\St Andrews\IT\IS5189 MSc Thesis\\02 Data\\"
             #pd.DataFrame.to_csv(correlation_list,fileloc + "Correlations.csv")
             #pd.DataFrame.to_csv(self.X_train,fileloc + "X_Train.csv")
-            return correlation_list, descstats_list
+            return correlation_list, descstats_list, df
 
     def descstats(self,columns_to_exclude = ['record_ID','target_purchase'],write = False,workdir = 'C:\\'):
         if self.loaded:
@@ -180,3 +185,9 @@ class DataSet():
                 fileloc = workdir + filename
                 pd.DataFrame.to_csv(descstats_list, fileloc)
             return descstats_list
+    def savedata(self,nrows = 1000, workdir = 'C:\\',target_value = 'target_purchase'):
+        if self.loaded:
+            train, test = cross_validation.train_test_split(self.dataset,test_size=0.1)
+            pd.DataFrame.to_csv(test, workdir + "SmallDataSet.csv")
+        else:
+            return 0

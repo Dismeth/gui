@@ -11,9 +11,10 @@ import matplotlib.pyplot as plt
 
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import roc_auc_score
 from sklearn.cross_validation import StratifiedKFold
 
-def naivebayesian(dataset,configFIUse,configFI):
+def naivebayesian(dataset,configFIUse,configFI,alpha,binerize):
     ds = dataset
     ds.dprint("Start Creating BernoulliNB Bayesian Network")
     if configFIUse:
@@ -23,11 +24,12 @@ def naivebayesian(dataset,configFIUse,configFI):
     else:
         X_train = ds.X_train
         X_test = ds.X_test
-    bnb = BernoulliNB()
+    bnb = BernoulliNB(alpha=alpha, binarize=binerize)
     y_pred = bnb.fit(X_train, ds.y_train).predict(X_test)
+    y_pred_proba = bnb.predict_proba(X_test)
     mislabeled = "Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0] ,(ds.y_test != y_pred).sum())
-    log_proba = bnb.score(X_test, ds.y_test)
-    return (mislabeled,log_proba)
+    auc = roc_auc_score(ds.y_test, y_pred_proba[:, 1])
+    return (mislabeled,auc,y_pred_proba)
 
 def nbnfeatureimportance(dataset, column_to_test, target_column_name = 'target_purchase'):
     ds = dataset
@@ -52,7 +54,7 @@ def findtopfeatures(dataset,columns_to_exclude,exclude_columns,target_column_nam
     return info
 
 
-def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = 'target_purchase'):
+def imp_topten(dataset,exclude_columns,columns_to_exclude,target_column_name = 'target_purchase'):
     ds = dataset
     columns = list(ds.X_train.columns.values)
     # Remove the columns to to be checked.
@@ -63,7 +65,6 @@ def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = '
     info = pd.DataFrame(columns=['Column', 'Total_Points', 'Mislabeled', 'Importance'])
 
     for index, column in enumerate(columns):
-        ds.dprint("Testing feature importance of column '" + str(column) + "'.")
         bnb = BernoulliNB()
         y_pred = bnb.fit(ds.X_train[[column]], ds.y_train)
         y_pred = y_pred.predict(ds.X_test[[column]])
@@ -71,6 +72,7 @@ def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = '
         total_points = ds.X_test.shape[0]
         mislabeled = (ds.y_test != y_pred).sum()
         info.loc[index] = (column, total_points, mislabeled, mislabeled)
+        ds.dprint("FI Column '" + str(column) + "'.: " + str(mislabeled))
 
     top_ten = info.sort_values(by='Mislabeled', ascending=True)
     #top_ten = top_ten.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
@@ -80,10 +82,23 @@ def imp_topten(dataset,columns_to_exclude,exclude_columns,target_column_name = '
     importance = top_ten['Mislabeled']
     y_pos = np.arange(len(columns))
 
-    plt.barh(y_pos, importance, align='center', alpha=0.4,label='Column (mislabeled points: %0.2f)')
-    plt.yticks(y_pos, columns)
-    draw(type="importance")
-    return top_ten
+    string = """
+    ======== ================
+    **Col**   **Mislabeled**
+    """
+    for index, row in top_ten.iterrows():
+        string += """
+    -------- ----------------
+     %s      %0.0f
+    """ % (row['Column'], row['Mislabeled'])
+
+    string += """
+    ======== ================
+    """
+    #plt.barh(y_pos, importance, align='center', alpha=0.4,label='Column (mislabeled points: %0.2f)')
+    #plt.yticks(y_pos, columns)
+    #draw(type="importance")
+    return top_ten, string
 
 """
 Function analysing the smaller dataset in order to find important features
@@ -137,6 +152,26 @@ def draw(type="roc"):
     plt.legend(loc="lower right")
     plt.show()
 
+class NaiveBayesClassifier():
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.y_hat = pd.Series(len(y))
+        self.probabilities = self._getestimates()
+        self.n = len(x)
+
+    def _getestimates(self):
+        self.estimates = pd.DataFrame(columns=['Column','Variable','Count'])
+        for column in self.x.columns.values:
+             self.estimates[column] = self.x[column].value_count()
+
+
+    def fit(self):
+        pass
+
+
+    def predict(self):
+        pass
 
 """
 bnb = BernoulliNB()
