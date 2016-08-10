@@ -15,7 +15,6 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn import metrics, preprocessing
 import matplotlib
 matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 

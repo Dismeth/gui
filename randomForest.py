@@ -3,7 +3,9 @@ import pandas as pd                                 # Pandas and Numpy
 import numpy as np                                  #
 from sklearn import ensemble                        #
 
-from scipy import interp
+import matplotlib
+matplotlib.use('TkAgg')
+matplotlib.rc('xtick', labelsize=7)
 import matplotlib.pyplot as plt
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -16,8 +18,7 @@ from sklearn.metrics import roc_auc_score
 
 def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
     ds = dataset
-    forest = ExtraTreesClassifier(n_estimators=250,
-                                  random_state=0)
+    forest = RandomForestClassifier(n_estimators=5,random_state=0, criterion='gini')
     columns = list(ds.X_train.columns.values)
     # Remove the columns to to be checked.
     if exclude_columns:
@@ -50,6 +51,8 @@ def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
             color="g", yerr=std[indices], align="center")
     plt.xticks(range(ds.X_train.shape[1]), neworder)
     plt.xlim([-1, ds.X_train.shape[1]])
+    plt.ylabel("Mean Impurity")
+    plt.xlabel("Columns / Features")
     plt.show()
     #print(score)
     #print(score2)

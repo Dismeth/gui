@@ -1,6 +1,6 @@
 from kivy.config import Config
-#Config.set('graphics', 'width', '1366')
-#.set('graphics', 'height', '768')
+Config.set('graphics', 'width', '1366')
+Config.set('graphics', 'height', '768')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
@@ -30,6 +30,7 @@ import numpy as np
 #some stuff end
 import randomForest
 import nbn
+import xgboost_model
 import datetime
 import time
 import timeit
@@ -113,6 +114,8 @@ class Root(FloatLayout):
         self.configFIUse = False # This has been updated.. Need to figure out how to control this one. (because record_ID and target_purchase is included.)
         self.dataOverview = {'data_loaded': False, 'fname': 'N/A', 'trainrows': 0, 'testrows': 0,'ncols': 0, 'best_score': 0}
         self.feedback("Settings has been reset.")
+        Config.set('graphics', 'width', '1366')
+        Config.set('graphics', 'height', '768')
 
     def __init__(self,**kwargs):
         super(Root, self).__init__(**kwargs)
@@ -127,7 +130,7 @@ class Root(FloatLayout):
         self.log_toggled = False
         self.menu_toggle_main_output()
         """ Welcome message etc """
-        version = 0.5
+        version = 0.9
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start."
         self.feedback(welcome)
         """
@@ -371,7 +374,6 @@ class Root(FloatLayout):
             self.feedback("Please load a dataset.")
 
 
-
     """
     Coarse Statistics
     """
@@ -428,6 +430,12 @@ Var1    Var2     Corr    p
             # Creating the output from the function
 
         else:
+            plt.figure()
+            plt.title("Feature importances")
+            plt.bar(range(0,15),range(5,20))
+            plt.ylabel("Mean Impurity")
+            plt.xlabel("Columns / Features")
+            plt.show()
             self.feedback("Please load a dataset.")
 
 
@@ -620,23 +628,49 @@ Number of %s
     """
 
     def menu_plot(self):
-        #digits = load_digits()
-        #X, y = digits.data, digits.target
+        from sklearn.metrics import mean_squared_error
+        from sklearn.metrics import accuracy_score
+        if self.loaded:
+            max_trees = range(50,850,100)
+            #max_depth = range(3,5,1)
+            depth = 3
+            list_auc = []
+            list_acc = []
+            list_trees = []
+            list_mse_training = []
+            list_mse_testing = []
+            scores = []
+            list_proba = []
 
+            for trees in max_trees:
+                auc, pred_proba, mislabeled,y_t_pred_proba = xgboost_model.buildXGBoost(data, self.configFI, self.configFIUse,max_depth=depth,n_est=trees)
+                list_mse_testing.append(mean_squared_error(data.y_test,pred_proba[:, 1]))
+                list_mse_training.append(mean_squared_error(data.y_train,y_t_pred_proba[:,1]))
+                list_auc.append(auc)
+                list_trees.append(trees)
+                list_acc.append(accuracy_score(data.y_test, np.argmax(pred_proba, axis = 1)))
+
+            import seaborn as sns
+            sns.set_style("white")
+            plt.figure()
+            plt.title("XGBOOST")
+            plt.xlabel("Number of Trees")
+            plt.ylabel("Score")
+            #train_scores_mean = np.mean(train_scores, axis=1)
+            #train_scores_std = np.std(train_scores, axis=1)
+            plt.grid()
+            plt.plot(list_trees,list_mse_training, 'o-', c=sns.color_palette()[0], label="Training score")
+            plt.plot(list_trees, list_mse_testing, '-', c=sns.color_palette()[1], label="Validation score")
+            plt.legend(loc="best")
+            # plt.savefig('D:\workdir\plot.png')
+            plt.show()
+
+
+    def menu_plot2(self):
         title = "Learning Curves (Naive Bayes)"
-        # Cross validation with 100 iterations to get smoother mean test and train
-        # score curves, each time with 20% data randomly selected as a validation set.
-        #print(data.X_train.shape[0])
         cv = cross_validation.ShuffleSplit(n=data.X_train.shape[0], n_iter=10,test_size=0.2, random_state=0)
 
         estimator = BernoulliNB()
-        #plt = self.plot_learning_curve(estimator, title, data, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
-        #print(plt)
-        #title = "Learning Curves (SVM, RBF kernel, $\gamma=0.001$)"
-        # SVC is more expensive so we do a lower number of CV iterations:
-        #cv = cross_validation.ShuffleSplit(digits.data.shape[0], n_iter=10,test_size=0.2, random_state=0)
-        #estimator = SVC(gamma=0.001)
-        #graphs.plot_learning_curve(estimator, title, data, (0.7, 1.01), n_jobs=4)
 
         #
         ylim = None
@@ -673,50 +707,20 @@ Number of %s
         #plt.savefig('D:\workdir\plot.png')
         plt.show()
 
-    def menu_svm(self):
-        # Cross validation with 100 iterations to get smoother mean test and train
-        # score curves, each time with 20% data randomly selected as a validation set.
-        # print(data.X_train.shape[0])
-        cv = cross_validation.ShuffleSplit(n=data.X_train.shape[0], n_iter=10, test_size=0.2, random_state=0)
+    """
+    END TESTING
+    """
 
-        title = "Learning Curves (SVM, RBF kernel, $\gamma=0.001$)"
+    def menu_xgboost(self):
+        if self.loaded:
+            auc, pred_proba, mislabeled = xgboost_model.buildXGBoost(data, self.configFI, self.configFIUse)
+            self.output_str("AUC: " + str(auc))
+            self.output_str(" " + str(mislabeled))
+            self.performance_report("XGBoost", pred_proba, data.y_test)
+            self.update_overview(best_score=float(format(auc, '.3f')))
 
-        estimator = SVC(gamma=0.001)
-        # graphs.plot_learning_curve(estimator, title, data, (0.7, 1.01), n_jobs=4)
-        #
-        ylim = None
-        n_jobs = 4
-        train_sizes = np.linspace(.1, 1.0, 5)
-
-        ds = data
-        X = ds.X_train
-        y = ds.y_train
-        plt.figure()
-        plt.title(title)
-        if ylim is not None:
-            plt.ylim(*ylim)
-        plt.xlabel("Training examples")
-        plt.ylabel("Score")
-        train_sizes, train_scores, test_scores = learning_curve(
-            estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
-        train_scores_mean = np.mean(train_scores, axis=1)
-        train_scores_std = np.std(train_scores, axis=1)
-        test_scores_mean = np.mean(test_scores, axis=1)
-        test_scores_std = np.std(test_scores, axis=1)
-        plt.grid()
-        plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                         train_scores_mean + train_scores_std, alpha=0.1,
-                         color="r")
-        plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                         test_scores_mean + test_scores_std, alpha=0.1, color="g")
-        plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-                 label="Training score")
-        plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-                 label="Cross-validation score")
-
-        plt.legend(loc="best")
-        # plt.savefig('D:\workdir\plot.png')
-        plt.show()
+        else:
+            self.feedback("Please load a dataset.")
 
     """
     END TESTING

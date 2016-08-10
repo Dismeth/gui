@@ -7,8 +7,8 @@ from sklearn.naive_bayes import BernoulliNB         # Naive Bayesian Network - B
 
 from scipy import interp
 from scipy.stats import pearsonr
-import matplotlib.pyplot as plt
-
+import matplotlib
+matplotlib.use('TkAgg')
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import roc_auc_score
