@@ -70,6 +70,33 @@ class DataSet():
         return self.dataset
 
     """
+    Scale the numerical columns using RobustScaler() from sklearn.preprocessing, which is more robust
+    to outliers.
+    Req: preprocessing from sklearn.
+    """
+    def scale(self,columns,categorical_cols,apply_list,target_column):
+        from sklearn.preprocessing import RobustScaler
+        scaler = RobustScaler()
+
+        if apply_list:
+            numerical_cols = columns
+        else:
+            numerical_cols = []
+            for col in self.dataset.columns.values:
+                if col not in categorical_cols:
+                    numerical_cols.append(col)
+                else:
+                    pass
+        # We don't want to scale the target variable, as it is already binary.
+        # The target column uses the same value as target_value from Split Data section
+        # in the settings popup.
+        numerical_cols.remove(target_column)
+        # Scale, fit and transform all the numerical columns
+        scaled_data = scaler.fit_transform(self.dataset[numerical_cols])
+        self.dataset[numerical_cols] = scaled_data
+        return self.dataset
+
+    """
     Split the data set into a training set and validation set. It also splits it into x (input) and y (target/output).
     Req: cross_validation from sklearn.
     Update 0.5: StratifiedShuffleSplit has been used in order to ensure the same label distribution
@@ -138,7 +165,8 @@ class DataSet():
             # used_columns is used to 'solve' the handshake problem. The total number of
             # items in correlation_list should be : n(n-1)/2 where n = len(self.X_train.columns.values).
             used_columns = []
-            correlation_list = pd.DataFrame(columns=['Var1', 'Var2','Correlation','P-Value'])
+            target_corr = []
+            correlation_list = pd.DataFrame(columns=['Var1', 'Var2','Correlation','P-Value','TargCorr'])
             descstats_list = pd.DataFrame(columns=['Var', 'Mean','SumOfValues','Minimum','Maximum','Count','Std'])
             i = 0
             ii = 0
@@ -150,16 +178,17 @@ class DataSet():
                         pass
                     else:
                         corr, p = pearsonr(self.X_train[column_a],self.X_train[column_b])
-                        correlation_list.loc[i] = [column_a, column_b, corr, p]
+                        t_corr, pp = pearsonr(self.X_train[column_a],self.y_train)
+                        correlation_list.loc[i] = [column_a, column_b, corr, p,t_corr]
                         i += 1
                 used_columns.insert(i,column_a)
                 ii += 1
             if check_recommendation:
                 # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
                 # Might be easier (and is shorter) to read by developers as an in house var name.
-                threshold = 0.8
-                df = correlation_list[correlation_list['Correlation'] >= threshold]
-                df = df.sort_values(by='Correlation',ascending=False)
+                threshold = 0.1
+                df = correlation_list[abs(correlation_list['TargCorr']) >= threshold]
+                df = df.sort_values(by='TargCorr',ascending=False)
 
 
             ######

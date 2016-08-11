@@ -26,11 +26,11 @@ def buildXGBoost(dataset,columns_to_exclude,exclude_columns,max_depth=7,n_est=10
 
     y_pred = xgb.predict(X_test)
     y_pred_proba = xgb.predict_proba(X_test)
-    y_t_pred_proba = xgb.predict_proba(X_train)
+    #y_t_pred_proba = xgb.predict_proba(X_train)
 
     total_points = ds.y_test.shape[0]
     mislabeled = (ds.y_test != y_pred).sum()
     auc = roc_auc_score(ds.y_test, y_pred_proba[:, 1])
     mislabeled = "Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0], (ds.y_test != y_pred).sum())
 
-    return auc, y_pred_proba, mislabeled, y_t_pred_proba
+    return auc, y_pred_proba, mislabeled

@@ -51,7 +51,7 @@ def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
             color="g", yerr=std[indices], align="center")
     plt.xticks(range(ds.X_train.shape[1]), neworder)
     plt.xlim([-1, ds.X_train.shape[1]])
-    plt.ylabel("Mean Impurity")
+    plt.ylabel("Mean Decrease Impurity")
     plt.xlabel("Columns / Features")
     plt.show()
     #print(score)

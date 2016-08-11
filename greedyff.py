@@ -1,11 +1,12 @@
 """
 
-Greedy Feature Selection using Logistic Regression as base model
-to optimize Area Under the ROC Curve
+A greedy feature selection made by Stubseid using BernoulliNB.
+The class is adapted from 'Greedy Feature Selection using Logistic Regression'
+to optimize Area Under the ROC Curve by Abhishek.
 
-__author__ : Abhishek
-
-Credits : Miroslaw @ Kaggle
+Credits :
+- Abhishek
+- Miroslaw @ Kaggle
 
 """
 
@@ -15,6 +16,7 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn import metrics, preprocessing
 import matplotlib
 matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 import seaborn as sns
 
 

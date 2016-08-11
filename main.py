@@ -59,20 +59,26 @@ class Settings(FloatLayout):
     newconfigGeneral = DictProperty({})
     newconfigCV = DictProperty({})
     newconfigLE = StringProperty(None)
+    newconfigScale = StringProperty(None)
     newconfigFI = StringProperty(None)
     newconfigFIUse = BooleanProperty(None)
 
     """
     Functions to save all the settings from the settings window.
     """
-    def saveGeneral(self, desc_stats_on_load, workdir):
+    def saveGeneral(self, desc_stats_on_load, workdir,apply_scale):
         self.newconfigGeneral['desc_stats_on_load'] = bool(desc_stats_on_load)
         self.newconfigGeneral['workdir'] = str(workdir)
+        self.newconfigGeneral['apply_scale'] = bool(apply_scale)
         return self.newconfigGeneral
 
     def saveLE(self,le_columns):
         self.newconfigLE = le_columns
         return self.newconfigLE
+
+    def saveScale(self, scale_columns):
+        self.newconfigScale = scale_columns
+        return self.newconfigScale
 
     def saveCV(self, target_value, test_set_size, seed, random_state):
         self.newconfigCV['target_value'] = str(target_value)
@@ -107,9 +113,10 @@ class Root(FloatLayout):
     best_score = StringProperty(None)
 
     def initialiseSettings(self):
-        self.configGeneral = {'desc_stats_on_load': True,'workdir': 'D:\workdir\\'}
+        self.configGeneral = {'desc_stats_on_load': True,'workdir': 'D:\workdir\\','apply_scale': False}
         self.configCV = {'target_value': 'target_purchase', 'test_set_size': 0.4, 'seed': 16, 'random_state_is': True}
         self.configLE = ['C2', 'C4', 'C5', 'C6', 'C9', 'C11', 'C13', 'C15', 'C16', 'C17', 'C19', 'C20', 'C21', 'C22', 'C28', 'C30', 'C53', 'C60']
+        self.configScale = ['C72','C73']
         self.configFI = ['C2'] #example columns to exclude
         self.configFIUse = False # This has been updated.. Need to figure out how to control this one. (because record_ID and target_purchase is included.)
         self.dataOverview = {'data_loaded': False, 'fname': 'N/A', 'trainrows': 0, 'testrows': 0,'ncols': 0, 'best_score': 0}
@@ -121,6 +128,7 @@ class Root(FloatLayout):
         super(Root, self).__init__(**kwargs)
         """ Global variables to be edited in the settings """
         self.loaded = False
+        self.split = False
         self.initialiseSettings()
         self._update_overviewGUI()
         """ Set up logging """
@@ -130,7 +138,7 @@ class Root(FloatLayout):
         self.log_toggled = False
         self.menu_toggle_main_output()
         """ Welcome message etc """
-        version = 0.9
+        version = 1.0
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start."
         self.feedback(welcome)
         """
@@ -270,7 +278,7 @@ class Root(FloatLayout):
     def show_settings(self):
         content = Settings(settings_save=self.settings_save, cancel=self.dismiss_popup,
                            newconfigGeneral=self.configGeneral,
-                           newconfigCV=self.configCV, newconfigLE=self.transform_config(self.configLE),
+                           newconfigCV=self.configCV, newconfigScale=self.transform_config(self.configScale), newconfigLE=self.transform_config(self.configLE),
                            newconfigFI=self.transform_config(self.configFI), newconfigFIUse=self.configFIUse)
         self._popup = Popup(title="Data Analysis Settings", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
@@ -279,11 +287,12 @@ class Root(FloatLayout):
     """
     Save Settings. Called when closing the settings_popup.
     """
-    def settings_save(self, updated_configGeneral, updated_configle, updated_configcv, updated_configfi, updated_use_fi):
+    def settings_save(self, updated_configGeneral, updated_configle, updated_configScale, updated_configcv, updated_configfi, updated_use_fi):
         # Updates the config
         self.configGeneral = updated_configGeneral
         self.configCV = updated_configcv
         self.configLE = self.transform_config(updated_configle,back=True)
+        self.configScale = self.transform_config(updated_configScale,back=True)
         self.configFI = self.transform_config(updated_configfi,back=True)
         self.configFIUse = updated_use_fi
         # Gives a feedback to the "console".
@@ -343,6 +352,16 @@ class Root(FloatLayout):
         else:
             self.feedback("Please load a dataset.")
 
+    def menu_scale(self):
+        if self.loaded:
+            # Clock.schedule_once(lambda dt: self.feedback("Start label encoded the data."), -1)
+            self.output_str("Start scaling numerical values.")
+            data.scale(columns=self.configScale,categorical_cols=self.configLE,apply_list=self.configGeneral['apply_scale'],target_column=self.configCV['target_value'])
+            self.output_str("End scaling numerical values.")
+            self.feedback("Succesfully label encoded the data.")
+        else:
+            self.feedback("Please load a dataset.")
+
 
 
     """
@@ -355,6 +374,7 @@ class Root(FloatLayout):
             self.output_str("Finished splitting the data.")
             self.feedback("Succesfully split the data.")
             self.update_overview(trainrows=len(data.X_train),testrows=len(data.X_test),ncols=len(data.X_train.columns.values))
+            self.split = True
         else:
             self.feedback("Please load a dataset.")
 
@@ -421,7 +441,7 @@ Var1    Var2     Corr    p
     """
 
     def menu_greedyff(self):
-        if self.loaded:
+        if self.loaded & self.split:
             greedysearch = greedyFF(data.X_train,data.y_train, verbose=1)
             greedysearch.transform()
             self.output_str(greedysearch.get_features())
@@ -433,7 +453,7 @@ Var1    Var2     Corr    p
             plt.figure()
             plt.title("Feature importances")
             plt.bar(range(0,15),range(5,20))
-            plt.ylabel("Mean Impurity")
+            plt.ylabel("Mean Decrease Impurity")
             plt.xlabel("Columns / Features")
             plt.show()
             self.feedback("Please load a dataset.")
@@ -446,7 +466,7 @@ Var1    Var2     Corr    p
     """
 
     def menu_nbn(self):
-        if self.loaded:
+        if self.loaded & self.split:
             alpha = 4
             binerize = 1.0
             output,auc,pred_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI,alpha,binerize)
@@ -459,15 +479,21 @@ Var1    Var2     Corr    p
             self.update_overview(best_score=float(format(auc, '.3f')))
             # Creating the output from the function
 
+            # Showing ROC plot
+            #self._roc_plot(y_proba=pred_proba, y=data.y_test,auc=auc, model='Naive Bayesian Network')
+
         else:
-            self.feedback("Please load a dataset.")
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
     """
     Build a RandomForest classifier.
     """
 
     def menu_randomforest(self):
-        if self.loaded:
+        if self.loaded & self.split:
             auc, pred_proba, mislabeled = randomForest.buildRandomForest(data, self.configFI, self.configFIUse)
             self.output_str("AUC: " + str(auc))
             self.output_str(" " + str(mislabeled))
@@ -475,7 +501,28 @@ Var1    Var2     Corr    p
             self.update_overview(best_score=float(format(auc, '.3f')))
 
         else:
-            self.feedback("Please load a dataset.")
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
+
+    """
+    Build an XGBoost classifier.
+    """
+
+    def menu_xgboost(self):
+        if self.loaded & self.split:
+            auc, pred_proba, mislabeled = xgboost_model.buildXGBoost(data, self.configFI, self.configFIUse)
+            self.output_str("AUC: " + str(auc))
+            self.output_str(" " + str(mislabeled))
+            self.performance_report("XGBoost", pred_proba, data.y_test)
+            self.update_overview(best_score=float(format(auc, '.3f')))
+
+        else:
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
 
     def performance_report(self,name,pred_proba,y):
@@ -574,11 +621,14 @@ Number of %s
     """
 
     def exp_nbn_best(self):
-        if self.loaded:
+        if self.loaded & self.split:
             result,string = nbn.imp_topten(data,self.configFIUse,self.configFI)
             self._output_last(string)
         else:
-            self.feedback("Please load a proper data set.")
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
 
     """
@@ -626,6 +676,35 @@ Number of %s
      TESTING NEW CODE
 
     """
+
+    def _roc_plot(self,y_proba,y,model='Unknown',title='Receiver Operating Characteristics',x_label="False Positive Rate",y_label='True Positive Rate',auc=None):
+        #from sklearn.metrics import mean_squared_error
+        #from sklearn.metrics import accuracy_score
+        from sklearn.metrics import roc_curve,roc_auc_score
+
+        if self.loaded:
+            if auc is None:
+                auc = roc_auc_score(y, y_proba[:, 1])
+
+            #list_mse_testing.append(mean_squared_error(y,pred_proba[:, 1]))
+            #list_acc.append(accuracy_score(data.y_test, np.argmax(pred_proba, axis = 1)))
+
+            import seaborn as sns
+            sns.set_style("white")
+            plt.figure()
+            plt.title(str(title))
+            plt.xlabel(str(x_label))
+            plt.ylabel(str(y_label))
+            #train_scores_mean = np.mean(train_scores, axis=1)
+            #train_scores_std = np.std(train_scores, axis=1)
+            plt.grid()
+            plt.plot(roc_curve(y, y_proba[:, 1])[:2], 'o-', c=sns.color_palette()[0], label=str(model) + " (AUC: %.2f)" % auc)
+            plt.plot((0., 1.), (0., 1.), "--k", alpha=.7)
+            #plt.plot(list_trees, list_mse_testing, '-', c=sns.color_palette()[1], label="Validation score")
+            plt.legend(loc="best")
+            # plt.savefig('D:\workdir\plot.png')
+            plt.show()
+
 
     def menu_plot(self):
         from sklearn.metrics import mean_squared_error
@@ -707,20 +786,7 @@ Number of %s
         #plt.savefig('D:\workdir\plot.png')
         plt.show()
 
-    """
-    END TESTING
-    """
 
-    def menu_xgboost(self):
-        if self.loaded:
-            auc, pred_proba, mislabeled = xgboost_model.buildXGBoost(data, self.configFI, self.configFIUse)
-            self.output_str("AUC: " + str(auc))
-            self.output_str(" " + str(mislabeled))
-            self.performance_report("XGBoost", pred_proba, data.y_test)
-            self.update_overview(best_score=float(format(auc, '.3f')))
-
-        else:
-            self.feedback("Please load a dataset.")
 
     """
     END TESTING
@@ -740,6 +806,11 @@ Number of %s
             self.output_text = self.output_log
             self.log_toggled = True
             self.feedback("Output log shown.")
+
+    def menu_output_clear(self):
+        self.output_str("--- Output Window Cleared ---")
+        self.output_log = ""
+        self.feedback("Output log and window cleared.")
 
 class Editor(App):
     pass
