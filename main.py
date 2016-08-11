@@ -141,6 +141,7 @@ class Root(FloatLayout):
         version = 1.0
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start."
         self.feedback(welcome)
+        self.output_str("Recommended settings loaded. Open 'Settings' using top right button. Application ready to load data.")
         """
         Open Settings first time, needed a delay in order to wait for everything to be properly set.
         """
@@ -671,6 +672,20 @@ Number of %s
         #print(df.head(10))
         print(pd.crosstab(df['Var1'], df['Var2']))
 
+
+    """
+
+    FUTURE EXTENSIONS:
+
+    """
+    def menu_future_ext1(self):
+        self.output_str("Future Extension #1")
+
+    def menu_future_ext2(self):
+        self.output_str("Future Extension #2")
+        self.feedback("Future Extension #2")
+
+
     """
 
      TESTING NEW CODE
@@ -812,7 +827,7 @@ Number of %s
         self.output_log = ""
         self.feedback("Output log and window cleared.")
 
-class Editor(App):
+class PyPredictor(App):
     pass
 
 Factory.register('Root', cls=Root)
@@ -821,4 +836,4 @@ Factory.register('SaveDialog', cls=SaveDialog)
 Factory.register('Settings', cls=Settings)
 
 if __name__ == '__main__':
-    Editor().run()
+    PyPredictor().run()

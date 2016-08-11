@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fb60ad1c-12e9-45af-8f5d-347a3fb03d74" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/editor.kv" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dataset.py" afterPath="$PROJECT_DIR$/dataset.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/editor.kv" afterPath="$PROJECT_DIR$/editor.kv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/greedyff.py" afterPath="$PROJECT_DIR$/greedyff.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/randomForest.py" afterPath="$PROJECT_DIR$/randomForest.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/xgboost_model.py" afterPath="$PROJECT_DIR$/xgboost_model.py" />
     </list>
     <ignored path="gui.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -29,69 +25,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="308">
-              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="31" />
+            <state relative-caret-position="667">
+              <caret line="685" column="44" selection-start-line="685" selection-start-column="44" selection-end-line="685" selection-end-column="44" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="plot_learning_curve.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../plot_learning_curve.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1452">
-              <caret line="50" column="51" selection-start-line="50" selection-start-column="51" selection-end-line="50" selection-end-column="51" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/testing/main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-              <folding>
-                <element signature="e#67#91#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="greedyff.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="greedyff.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/greedyff.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="6" column="10" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
+            <state relative-caret-position="-2308">
+              <caret line="6" column="9" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
               <folding>
-                <element signature="e#246#264#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="stats.py" pinned="false" current-in-tab="false">
-        <entry file="file://C:/Anaconda2/Lib/site-packages/scipy/stats/stats.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97746">
-              <caret line="2968" column="0" selection-start-line="2968" selection-start-column="0" selection-end-line="2968" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="graphs.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graphs.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="27" column="42" selection-start-line="27" selection-start-column="41" selection-end-line="27" selection-end-column="42" />
-              <folding>
-                <element signature="e#17#35#0" expanded="true" />
+                <element signature="e#245#263#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -100,7 +50,7 @@
       <file leaf-file-name="nbn.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nbn.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
+            <state relative-caret-position="-5344">
               <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
               <folding>
                 <element signature="e#24#94#0" expanded="true" />
@@ -112,7 +62,7 @@
       <file leaf-file-name="dataset.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataset.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
+            <state relative-caret-position="-3661">
               <caret line="86" column="22" selection-start-line="86" selection-start-column="22" selection-end-line="86" selection-end-column="22" />
               <folding>
                 <element signature="e#151#211#0" expanded="true" />
@@ -124,7 +74,7 @@
       <file leaf-file-name="randomForest.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/randomForest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="803">
+            <state relative-caret-position="-658">
               <caret line="53" column="40" selection-start-line="53" selection-start-column="40" selection-end-line="53" selection-end-column="40" />
               <folding>
                 <element signature="e#24#94#0" expanded="true" />
@@ -136,7 +86,7 @@
       <file leaf-file-name="xgboost_model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/xgboost_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="761">
+            <state relative-caret-position="629">
               <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
               <folding>
                 <element signature="e#24#65#0" expanded="true" />
@@ -175,8 +125,8 @@
         <option value="$PROJECT_DIR$/dataset.py" />
         <option value="$PROJECT_DIR$/xgboost_model.py" />
         <option value="$PROJECT_DIR$/randomForest.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/greedyff.py" />
+        <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
   </component>
@@ -674,7 +624,14 @@
       <option name="project" value="LOCAL" />
       <updated>1470825932743</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Version 1.0&#10;">
+      <created>1470916212795</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1470916212795</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -730,7 +687,8 @@
     <MESSAGE value="Version 0.5" />
     <MESSAGE value="Version 0.6- Added greedy feature search&#10;" />
     <MESSAGE value="Version 0.7&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Version 0.7&#10;" />
+    <MESSAGE value="Version 1.0&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Version 1.0&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -751,7 +709,7 @@
         <state relative-caret-position="1155">
           <caret line="41" column="43" selection-start-line="41" selection-start-column="43" selection-end-line="41" selection-end-column="47" />
           <folding>
-            <element signature="e#17#35#0" expanded="true" />
+            <element signature="e#17#35#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -811,7 +769,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#17#35#0" expanded="true" />
+            <element signature="e#17#35#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -863,7 +821,7 @@
         <state relative-caret-position="264">
           <caret line="9" column="27" selection-start-line="9" selection-start-column="27" selection-end-line="9" selection-end-column="27" />
           <folding>
-            <element signature="e#17#35#0" expanded="true" />
+            <element signature="e#17#35#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1077,16 +1035,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../plot_learning_curve.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1452">
-          <caret line="50" column="51" selection-start-line="50" selection-start-column="51" selection-end-line="50" selection-end-column="51" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/best_fit.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1005">
@@ -1094,13 +1042,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/testing/main.py">
+    <entry file="file://C:/Anaconda2/Lib/site-packages/scipy/stats/stats.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding>
-            <element signature="e#67#91#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-16993">
+          <caret line="2968" column="0" selection-start-line="2968" selection-start-column="0" selection-end-line="2968" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1109,22 +1055,44 @@
         <state relative-caret-position="528">
           <caret line="27" column="42" selection-start-line="27" selection-start-column="41" selection-end-line="27" selection-end-column="42" />
           <folding>
-            <element signature="e#17#35#0" expanded="true" />
+            <element signature="e#17#35#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/Anaconda2/Lib/site-packages/scipy/stats/stats.py">
+    <entry file="file://$PROJECT_DIR$/testing/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97746">
-          <caret line="2968" column="0" selection-start-line="2968" selection-start-column="0" selection-end-line="2968" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="330">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding>
+            <element signature="e#67#91#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../plot_learning_curve.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="926">
+          <caret line="50" column="51" selection-start-line="50" selection-start-column="51" selection-end-line="50" selection-end-column="51" />
+          <folding>
+            <element signature="e#0#18#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/greedyff.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2308">
+          <caret line="6" column="9" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
+          <folding>
+            <element signature="e#245#263#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nbn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
+        <state relative-caret-position="-5344">
           <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
           <folding>
             <element signature="e#24#94#0" expanded="true" />
@@ -1134,7 +1102,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dataset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
+        <state relative-caret-position="-3661">
           <caret line="86" column="22" selection-start-line="86" selection-start-column="22" selection-end-line="86" selection-end-column="22" />
           <folding>
             <element signature="e#151#211#0" expanded="true" />
@@ -1142,19 +1110,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/xgboost_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="761">
-          <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
-          <folding>
-            <element signature="e#24#65#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/randomForest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="803">
+        <state relative-caret-position="-658">
           <caret line="53" column="40" selection-start-line="53" selection-start-column="40" selection-end-line="53" selection-end-column="40" />
           <folding>
             <element signature="e#24#94#0" expanded="true" />
@@ -1162,21 +1120,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/xgboost_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="31" />
-          <folding />
+        <state relative-caret-position="629">
+          <caret line="30" column="37" selection-start-line="30" selection-start-column="37" selection-end-line="30" selection-end-column="37" />
+          <folding>
+            <element signature="e#24#65#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/greedyff.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="6" column="10" selection-start-line="6" selection-start-column="10" selection-end-line="6" selection-end-column="10" />
-          <folding>
-            <element signature="e#246#264#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="667">
+          <caret line="685" column="44" selection-start-line="685" selection-start-column="44" selection-end-line="685" selection-end-column="44" />
+          <folding />
         </state>
       </provider>
     </entry>
