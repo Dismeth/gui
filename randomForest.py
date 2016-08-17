@@ -5,7 +5,7 @@ from sklearn import ensemble                        #
 
 import matplotlib
 matplotlib.use('TkAgg')
-matplotlib.rc('xtick', labelsize=7)
+matplotlib.rc('xtick', labelsize=10)
 import matplotlib.pyplot as plt
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -14,11 +14,14 @@ from sklearn.ensemble import RandomForestClassifier
 #from sklearn import cross_validation
 from sklearn.cross_validation import cross_val_score
 from sklearn.metrics import roc_auc_score
+import random
 
 
 def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
+    # Update v1.1: Random Forest N_estimators have been set to 10 and only top 15
+    # features are shown due to space limitations.
     ds = dataset
-    forest = RandomForestClassifier(n_estimators=5,random_state=0, criterion='gini')
+    forest = RandomForestClassifier(n_estimators=10,max_depth=5, criterion='gini')
     columns = list(ds.X_train.columns.values)
     # Remove the columns to to be checked.
     if exclude_columns:
@@ -47,16 +50,75 @@ def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
     # Plot the feature importances of the forest
     plt.figure()
     plt.title("Feature importances")
-    plt.bar(range(ds.X_train.shape[1]), importances[indices],
-            color="g", yerr=std[indices], align="center")
-    plt.xticks(range(ds.X_train.shape[1]), neworder)
-    plt.xlim([-1, ds.X_train.shape[1]])
+    # ds.X_train.shape[1]
+    plt.bar(range(15), importances[indices][:15],
+            color="g", yerr=std[indices][:15], align="center")
+    plt.xticks(range(15), neworder)
+    plt.xlim([-1, 15])
+    plt.ylim(0,np.amax(importances)+0.1)
     plt.ylabel("Mean Decrease Impurity")
     plt.xlabel("Columns / Features")
     plt.show()
     #print(score)
     #print(score2)
     return info
+
+
+def fi_RandomForest_improved(dataset, columns_to_exclude, exclude_columns, estimators=10, maximum_depth=7):
+    # Update v1.1: Random Forest N_estimators have been set to 10 and only top 15
+    # features are shown due to space limitations.
+    ds = dataset
+    forest = RandomForestClassifier(n_estimators=estimators, max_depth=maximum_depth, criterion='gini')
+    dummy_forest = RandomForestClassifier(n_estimators=estimators, max_depth=maximum_depth, criterion='gini')
+    columns = list(ds.X_train.columns.values)
+    # Remove the columns to to be checked.
+    if exclude_columns:
+        for remove_column in columns_to_exclude:
+            columns.remove(remove_column)
+        ds.X_train.drop(columns_to_exclude, inplace=True, axis=1)
+
+    dummy_y = ds.y_train.sample(frac=1).reset_index(drop=True)
+    forest.fit(ds.X_train, ds.y_train)
+    dummy_forest.fit(ds.X_train, dummy_y)
+    importances = forest.feature_importances_
+    dummy_importances = dummy_forest.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in forest.estimators_],
+                 axis=0)
+    dummy_std = np.std([tree.feature_importances_ for tree in dummy_forest.estimators_],
+                       axis=0)
+    indices = np.argsort(importances)[::-1]
+    dummy_indices = np.argsort(dummy_importances)[::-1]
+
+    columns = list(ds.X_train.columns.values)
+    neworder = []
+    dummy_neworder = []
+    info = pd.DataFrame(columns=['Column', 'Feature Importance'])
+    for f in range(ds.X_train.shape[1]):
+        neworder.insert(f, columns[indices[f]])
+        dummy_neworder.insert(f, columns[dummy_indices[f]])
+        # print("%d. feature %s (%f)" % (f + 1, columns[indices[f]], importances[indices[f]]))
+        info.loc[f] = [columns[indices[f]], importances[indices[f]]]
+
+    # Dummy variable y percent wrong:
+    dummy_y_percent = ((ds.y_train != dummy_y).sum()) / float(len(ds.y_train)) * 100
+
+    # Plot the feature importances of the forest
+    plt.figure()
+    plt.title("Random Forest Feature Importances (v2)")
+    # ds.X_train.shape[1]
+    plt.scatter(range(15), importances[indices][:15], color="g", label="Real y")
+    plt.scatter(range(15), dummy_importances[dummy_indices][:15], color="r",
+                label="Dummy/shuffled y (%.2f %% false)" % dummy_y_percent)
+    plt.xticks(range(15), neworder)
+    plt.xlim([-1, 15])
+    plt.ylim(0, np.amax(importances) + 0.1)
+    plt.ylabel("Mean Decrease Impurity")
+    plt.xlabel("Columns / Features")
+    plt.legend(loc="best")
+    plt.show()
+
+    return info
+
 
 def buildRandomForest(dataset,columns_to_exclude,exclude_columns):
     ds = dataset
@@ -93,3 +155,75 @@ def buildRandomForest(dataset,columns_to_exclude,exclude_columns):
     #out_of_bag_prediction_for_x = randforest.oob_prediction_
 
     #print(out_of_bag_prediction_for_x, x))
+
+
+import seaborn as sns
+
+sns.set(style="whitegrid", color_codes=True)
+
+
+
+
+def fi_RandomForest_improved2(dataset, columns_to_exclude, exclude_columns, estimators=1, maximum_depth=2):
+    # Update v1.1: Random Forest N_estimators have been set to 10 and only top 15
+    # features are shown due to space limitations.
+    ds = dataset
+
+    columns = list(ds.X_train.columns.values)
+    # Remove the columns to to be checked.
+    if exclude_columns:
+        for remove_column in columns_to_exclude:
+            columns.remove(remove_column)
+        ds.X_train.drop(columns_to_exclude, inplace=True, axis=1)
+
+    dummy_y = ds.y_train.sample(frac=1).reset_index(drop=True)
+    number_times = 100
+    columns = list(ds.X_train.columns.values)
+    info = pd.DataFrame(columns=['Column', 'Value', 'Dummy'])
+    # dummy_info = pd.DataFrame(columns=['Column', 'Value'])
+    total_columns = pd.Series()
+
+    for i in range(number_times):
+        forest = RandomForestClassifier(n_estimators=estimators, max_depth=maximum_depth, criterion='gini', n_jobs=-1)
+        dummy_forest = RandomForestClassifier(n_estimators=estimators, max_depth=maximum_depth, criterion='gini',
+                                              n_jobs=-1)
+
+        random_cols = pd.Series(random.sample(columns, 3))
+        total_columns = total_columns.append(random_cols)
+
+        forest.fit(ds.X_train[random_cols], ds.y_train)
+        dummy_forest.fit(ds.X_train[random_cols], dummy_y)
+
+        importances = forest.feature_importances_
+        dummy_importances = dummy_forest.feature_importances_
+
+        # std = np.std([tree.feature_importances_ for tree in forest.estimators_],axis=0)
+        # dummy_std = np.std([tree.feature_importances_ for tree in dummy_forest.estimators_], axis=0)
+        indices = np.argsort(importances)[::-1]
+        dummy_indices = np.argsort(dummy_importances)[::-1]
+
+        neworder = []
+        dummy_neworder = []
+
+        for f in range(3):
+            neworder.insert(f, random_cols[indices[f]])
+            dummy_neworder.insert(f, random_cols[dummy_indices[f]])
+            # print("%d. feature %s (%f)" % (f + 1, columns[indices[f]], importances[indices[f]]))
+
+        info.loc[len(info)] = [neworder[0], importances[indices[0]], 0]
+        info.loc[len(info)] = [neworder[0], dummy_importances[indices[0]], 1]
+
+    # Dummy variable y percent wrong:
+    dummy_y_percent = ((ds.y_train != dummy_y).sum()) / float(len(ds.y_train)) * 100
+
+    # Plot the feature importances of the forest
+    plt.figure()
+    plt.title("RF Feature Importances (v3) - %.2f%% error in Dummy-set" % dummy_y_percent)
+    sns.stripplot(x="Column", y="Value", data=info, hue="Dummy", jitter=True, size=10)
+    # sns.stripplot(x="Column", y="Value", data=dummy_info, jitter=True, color = sns.color_palette()[2],size=10)
+    # sns.boxplot(x="Column", y="Value", data=info, hue="Dummy");
+    plt.ylabel("Relative Feature Importance Score")
+    plt.xlabel("Columns / Features")
+
+    plt.show()
+    return info, total_columns, dummy_y_percent

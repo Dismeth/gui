@@ -138,7 +138,7 @@ class Root(FloatLayout):
         self.log_toggled = False
         self.menu_toggle_main_output()
         """ Welcome message etc """
-        version = 1.0
+        version = 1.1
         welcome = "Welcome user. This is version " + str(version) + ". Click on Load to start."
         self.feedback(welcome)
         self.output_str("Recommended settings loaded. Open 'Settings' using top right button. Application ready to load data.")
@@ -382,17 +382,7 @@ class Root(FloatLayout):
 
 
 
-    """
-    Build a RandomForest classifier and return feature importances.
-    """
-    def menu_feature_importance(self):
-        if self.loaded:
-            info = randomForest.feature_importance_RandomForest(data, self.configFI, self.configFIUse)
-            self.output_str(info)
-            location = self.write_output(info, filename='Feature-Importance.csv')
-            self.feedback("Feature importance calculated. Results written to file: " + str(location))
-        else:
-            self.feedback("Please load a dataset.")
+
 
 
     """
@@ -459,6 +449,25 @@ Var1    Var2     Corr    p
             plt.show()
             self.feedback("Please load a dataset.")
 
+    """
+    Build a shallow RandomForest classifier and return feature importances.
+    """
+    def menu_feature_importance(self):
+        if self.loaded & self.split:
+            info = randomForest.fi_RandomForest_improved(data, self.configFI, self.configFIUse, estimators=100, maximum_depth=17)
+            #new_info = ""
+            #for word in info.to_string():
+            #    new_info += word
+            #    new_info += "\r \n"
+            #self._output_last(new_info)
+            self.output_str("Random Forest Feature Importance finished (v2). Swap view for more information, or see workdir.")
+            location = self.write_output(info, filename='Feature-Importance.csv')
+            self.feedback("Feature importance calculated. Results written to file: " + str(location))
+        else:
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
     """
 
@@ -559,6 +568,17 @@ Var1    Var2     Corr    p
             self.output_text = self.output_log
         else:
             self.output_text = self.output_last
+
+    """
+
+    Adding newline to longer output for use in _output_last().
+
+    """
+
+    def _convert_newline(self,output):
+        new_output = ""
+
+        return new_output
 
     """
     _output_last() is used for more extensive information rather than "label encoding finished successfully" etc.

@@ -156,9 +156,9 @@ class DataSet():
         else:
             return 0
 
-    def correlation(self,check_recommendation=True):
-        # TO DO: add removal of corr. data
-        # TO DO: add support for 'folder' to be used.
+    def correlation(self,check_recommendation=True,columns_to_check=None):
+        # V1.1 added support for columns_to_check to check only certain columns (for FS).
+        # added support for workdir - but in main.py (Root class)
         self.loaded = True
         #check_recommendation = False
         if self.loaded:
@@ -170,10 +170,19 @@ class DataSet():
             descstats_list = pd.DataFrame(columns=['Var', 'Mean','SumOfValues','Minimum','Maximum','Count','Std'])
             i = 0
             ii = 0
-            for column_a in self.X_train.columns.values:
+            #
+            # New feature to be used outside the GUI.. Now we can check correlations
+            # between selected columns to increase Bayes performance.
+            #
+            if columns_to_check == None:
+                columns_values = self.X_train.columns.values
+            else:
+                columns_values = columns_to_check
+
+            for column_a in columns_values: # columns_values instead of self.X_train.columns.values.
                 var = self.X_train[column_a]
                 descstats_list.loc[ii] = [column_a, var.mean(), var.sum(), var.min(), var.max(), var.count(), var.std()]
-                for column_b in self.X_train.columns.values:
+                for column_b in columns_values:
                     if column_a == column_b or column_b in used_columns:
                         pass
                     else:

@@ -5,7 +5,7 @@ import numpy as np
 #sys.path.append("C:\\Anaconda2\\Lib\\site-packages\\xgboost-0.4-py2.7.egg\\xgboost")
 import matplotlib
 matplotlib.use('TkAgg')
-matplotlib.rc('xtick', labelsize=7)
+matplotlib.rc('xtick', labelsize=10)
 import matplotlib.pyplot as plt
 from xgboost import XGBClassifier
 
