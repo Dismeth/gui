@@ -63,6 +63,13 @@ def feature_importance_RandomForest(dataset,columns_to_exclude,exclude_columns):
     #print(score2)
     return info
 
+"""
+
+This is RF Feature Importance version 2 as shown in the beginning of section 7 Results and Evaluation.
+
+
+NB: the novel method is further down: fi_RandomForest_improved2()
+"""
 
 def fi_RandomForest_improved(dataset, columns_to_exclude, exclude_columns, estimators=10, maximum_depth=7):
     # Update v1.1: Random Forest N_estimators have been set to 10 and only top 15
@@ -119,13 +126,19 @@ def fi_RandomForest_improved(dataset, columns_to_exclude, exclude_columns, estim
 
     return info
 
+"""
 
+Build a Random Forest, called from the main menu in the Root class (menu_randomforest()).
+Room for improvements, e.g. receiving parameters that are able to be modified in the settings window.
+n_estimators and max_depth should be implemented as a minimum in future work.
+
+"""
 def buildRandomForest(dataset,columns_to_exclude,exclude_columns):
     ds = dataset
     randforest = RandomForestClassifier(n_estimators=100, max_depth= 7, oob_score=True,n_jobs=-1)
 
     """
-    For own usage:
+    The parameters that can be adjusted:
     n_estimators=10, criterion='gini', max_depth=None, min_samples_split=2, min_samples_leaf=1,
     min_weight_fraction_leaf=0.0, max_features='auto', max_leaf_nodes=None, bootstrap=True,
     oob_score=False, n_jobs=1, random_state=None, verbose=0, warm_start=False, class_weight=None

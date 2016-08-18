@@ -9,10 +9,8 @@ from scipy import interp
 from scipy.stats import pearsonr
 import matplotlib
 matplotlib.use('TkAgg')
-from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import roc_auc_score
-from sklearn.cross_validation import StratifiedKFold
 
 def naivebayesian(dataset,configFIUse,configFI,alpha,binerize):
     ds = dataset
@@ -95,9 +93,6 @@ def imp_topten(dataset,exclude_columns,columns_to_exclude,target_column_name = '
     string += """
     ======== ================
     """
-    #plt.barh(y_pos, importance, align='center', alpha=0.4,label='Column (mislabeled points: %0.2f)')
-    #plt.yticks(y_pos, columns)
-    #draw(type="importance")
     return top_ten, string
 
 """
@@ -118,80 +113,3 @@ def quickanalyse(dataset,columns_to_exclude,exclude_columns,target_column_name =
         info.loc[index] = (column,pearsonr(ds.X_train[[column]],ds.y_train),0,0)
 
     return info
-
-def computeROC():
-    # Compute ROC curve and area the curve
-    mean_tpr = 0.0
-    mean_fpr = np.linspace(0, 1, 100)
-    fpr, tpr, thresholds = roc_curve(ds.y_test, y_pred)
-    mean_tpr += interp(mean_fpr, fpr, tpr)
-    mean_tpr[0] = 0.0
-    roc_auc = auc(fpr, tpr)
-    plt.plot(fpr, tpr, lw=1, label='ROC fold %d (area = %0.2f)' % (index, roc_auc))
-
-def draw(type="roc"):
-    if type== "roc":
-        plt.xlim([-0.05, 1.05])
-        plt.ylim([-0.05, 1.05])
-        xlabel = 'False Positive Rate'
-        ylabel = 'True Positive Rate'
-        title = 'Receiver operating characteristic example'
-    elif type=="importance":
-        #plt.xlim([-0.05, 1.05])
-        #plt.ylim([-0.05, 1.05])
-        xlabel = 'Mislabeled Predictions (less is better)'
-        ylabel = 'Variable Name'
-        title = 'Top 10 Features'
-    else:
-        title = 'Some Accurate Title - Other Type Graph'
-        xlabel = 'X-LABEL'
-        ylabel = 'Y-LABEL'
-    plt.xlabel(str(xlabel))
-    plt.ylabel(str(ylabel))
-    plt.title(str(title))
-    plt.legend(loc="lower right")
-    plt.show()
-
-class NaiveBayesClassifier():
-    def __init__(self,x,y):
-        self.x = x
-        self.y = y
-        self.y_hat = pd.Series(len(y))
-        self.probabilities = self._getestimates()
-        self.n = len(x)
-
-    def _getestimates(self):
-        self.estimates = pd.DataFrame(columns=['Column','Variable','Count'])
-        for column in self.x.columns.values:
-             self.estimates[column] = self.x[column].value_count()
-
-
-    def fit(self):
-        pass
-
-
-    def predict(self):
-        pass
-
-"""
-bnb = BernoulliNB()
-y_pred = bnb.fit(X_train, y_train).predict(X_test)
-print("Number of mislabeled points out of a total %d points : %d" % (X_test.shape[0] ,(y_test != y_pred).sum()))
-
-dprint("Get the parameters")
-params = bnb.get_params(deep=True)
-print params
-
-dprint("Get the log probabilitites")
-log_proba = bnb.score(X_test,y_test)
-print log_proba
-
-
-
-# Compute ROC curve and area the curve
-        fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
-        mean_tpr += interp(mean_fpr, fpr, tpr)
-        mean_tpr[0] = 0.0
-        roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, lw=1, label='ROC fold %d (area = %0.2f)' % (i, roc_auc))
-"""

@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 from sklearn.metrics import roc_auc_score
 import numpy as np
-#import sys
-#sys.path.append("C:\\Anaconda2\\Lib\\site-packages\\xgboost-0.4-py2.7.egg\\xgboost")
 import matplotlib
 matplotlib.use('TkAgg')
 matplotlib.rc('xtick', labelsize=10)
 import matplotlib.pyplot as plt
 from xgboost import XGBClassifier
 
-def buildXGBoost(dataset,columns_to_exclude,exclude_columns,max_depth=7,n_est=10):
+
+"""
+Build XGBoost classifier. Is able to receive important arguments such as max_depth and
+number of trees, however are not being utilised in the Root().
+
+Returns auc and y_pred_proba used to compute all the evaluation metrics, as well as a simple output
+giving an indication of performance based on mislabeled classes.
+"""
+def buildXGBoost(dataset,columns_to_exclude,exclude_columns,max_depth=7,n_est=100):
     ds = dataset
 
     # Remove the columns to to be checked.
@@ -21,7 +27,7 @@ def buildXGBoost(dataset,columns_to_exclude,exclude_columns,max_depth=7,n_est=10
         X_train = ds.X_train
         X_test = ds.X_test
 
-    xgb = XGBClassifier(seed=14, max_depth=max_depth, n_estimators=n_est, silent=False, learning_rate=0.01)
+    xgb = XGBClassifier(max_depth=max_depth, n_estimators=n_est, silent=False, learning_rate=0.01)
     xgb.fit(X_train,ds.y_train)
 
     y_pred = xgb.predict(X_test)

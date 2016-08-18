@@ -534,7 +534,11 @@ Var1    Var2     Corr    p
             elif self.split is False:
                 self.feedback("Please split the data set into training and validation sets.")
 
-
+    """
+    Internal function to produce the evaluation metrics and format the output.
+    Is dependant on the prediction probabilities based on covariates X and the real y-values.
+    Should be used with the test-set, and not training-set to get the generalisation error.
+    """
     def performance_report(self,name,pred_proba,y):
         from sklearn.metrics import roc_auc_score, roc_curve, log_loss, classification_report, accuracy_score
         self.output_str(str(name) + ":")
