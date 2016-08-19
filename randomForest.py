@@ -175,9 +175,15 @@ import seaborn as sns
 sns.set(style="whitegrid", color_codes=True)
 
 
+"""
+
+This is RF Feature Importance version 2 as shown in the beginning of section 7 Results and Evaluation.
 
 
-def fi_RandomForest_improved2(dataset, columns_to_exclude, exclude_columns, estimators=1, maximum_depth=2):
+NB: the novel method is further down: fi_RandomForest_improved2()
+"""
+
+def fi_RandomForest_improved2(dataset, exclude_columns, columns_to_exclude, estimators=1, maximum_depth=2):
     # Update v1.1: Random Forest N_estimators have been set to 10 and only top 15
     # features are shown due to space limitations.
     ds = dataset
@@ -190,7 +196,10 @@ def fi_RandomForest_improved2(dataset, columns_to_exclude, exclude_columns, esti
         ds.X_train.drop(columns_to_exclude, inplace=True, axis=1)
 
     dummy_y = ds.y_train.sample(frac=1).reset_index(drop=True)
-    number_times = 100
+
+    #Demo purposes!
+    #number_times = 100
+    number_times = 10
     columns = list(ds.X_train.columns.values)
     info = pd.DataFrame(columns=['Column', 'Value', 'Dummy'])
     # dummy_info = pd.DataFrame(columns=['Column', 'Value'])

@@ -195,8 +195,8 @@ class DataSet():
             if check_recommendation:
                 # df is short for DataFrame , to make it more readable when manipulating the Pandas DataFrame.
                 # Might be easier (and is shorter) to read by developers as an in house var name.
-                threshold = 0.1
-                df = correlation_list[abs(correlation_list['TargCorr']) >= threshold]
+                threshold = 0.5
+                df = correlation_list[abs(correlation_list['Correlation']) >= threshold]
                 df = df.sort_values(by='TargCorr',ascending=False)
 
 

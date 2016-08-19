@@ -392,7 +392,8 @@ class Root(FloatLayout):
     def menu_coarse_statistics(self):
         if self.loaded:
             desc = data.descstats(write=False)
-            self.output_str(desc)
+            self.output_str("Coarse statistics finished.")
+            self._output_last(desc)
             location = self.write_output(desc, filename='Coarse-Statistics.csv')
             self.feedback("Descriptive statistics calculated. Results written to file: " + str(location))
         else:
@@ -402,7 +403,7 @@ class Root(FloatLayout):
     Variable Correlations
     """
     def menu_var_corr(self):
-        if self.loaded:
+        if self.loaded & self.split:
             correlation, descstats, df = data.correlation()
             location = self.write_output(df,"Correlations.csv")
             self._output_last(df)
@@ -412,18 +413,23 @@ class Root(FloatLayout):
 
             string = """
 ======  ======  =======  ======
-Var1    Var2     Corr    p
+Var1    Var2     Corr     p
             """
             for index, row in df.iterrows():
                 string += """
 ------  ------  -------  ------
-%s       %s    %0.3f    %0.1f
+%s       %s    %0.3f     %0.1f
                 """ % (row['Var1'],row['Var2'],row['Correlation'],row['P-Value'])
             string += """
 ======  ======  =======  ======
             """
             self._output_last(string)
             self.feedback("Variable correlations calculated. Results written to file: " + location)
+        else:
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
     """
 
@@ -441,20 +447,19 @@ Var1    Var2     Corr    p
             # Creating the output from the function
 
         else:
-            plt.figure()
-            plt.title("Feature importances")
-            plt.bar(range(0,15),range(5,20))
-            plt.ylabel("Mean Decrease Impurity")
-            plt.xlabel("Columns / Features")
-            plt.show()
-            self.feedback("Please load a dataset.")
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
     """
     Build a shallow RandomForest classifier and return feature importances.
     """
     def menu_feature_importance(self):
         if self.loaded & self.split:
-            info = randomForest.fi_RandomForest_improved(data, self.configFI, self.configFIUse, estimators=100, maximum_depth=17)
+            # Please adjust the estimators and maximum_depth for faster/instable or slower/stable
+            # feature importance!
+            info = randomForest.fi_RandomForest_improved(data, self.configFI, self.configFIUse, estimators=10, maximum_depth=7)
             #new_info = ""
             #for word in info.to_string():
             #    new_info += word
@@ -481,10 +486,10 @@ Var1    Var2     Corr    p
             binerize = 1.0
             output,auc,pred_proba = nbn.naivebayesian(data,self.configFIUse,self.configFI,alpha,binerize)
             #self.output_str(ypred)
-            self.output_str(output)
-            self.output_str(pred_proba)
-            self.performance_report("Naive Bayesian Network",pred_proba,data.y_test)
             self.feedback("Succesfully made a Naive Bayesian Network.")
+            #self.output_str(pred_proba)
+            self.performance_report("Naive Bayesian Network",pred_proba,data.y_test)
+            self.output_str(output)
 
             self.update_overview(best_score=float(format(auc, '.3f')))
             # Creating the output from the function
@@ -703,7 +708,17 @@ Number of %s
 
     """
     def menu_future_ext1(self):
-        self.output_str("Future Extension #1")
+        if self.loaded & self.split:
+            self.output_str("Future Extension #1")
+            est = 1
+            depth = 2
+            self.output_str("Demonstration 19.8 - Novel Feature Importance based on Random Forest")
+            info, total_columns, dummy_y_percent = randomForest.fi_RandomForest_improved2(data,self.configFIUse,self.configFI, estimators=est, maximum_depth=depth)
+        else:
+            if self.loaded is False:
+                self.feedback("Please load a dataset.")
+            elif self.split is False:
+                self.feedback("Please split the data set into training and validation sets.")
 
     def menu_future_ext2(self):
         self.output_str("Future Extension #2")
