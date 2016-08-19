@@ -1,28 +1,21 @@
 # GUI - Predicting Consumer Purchasing Decisions
-made by Saavi Stubseid {sgs4@st-andrews.ac.uk}. Last Updated 07.07.2016.
+made by Saavi Stubseid {sgs4@st-andrews.ac.uk}. Last Updated 19.08.2016.
 
-This is the repository for the graphical user interface of the analysis of the data set used, in order to predict the consumer's purchasing decisions.
+In partial fulfilment for the requiremenets of MSc Management & IT @ University of St Andrews.
 
-The application is written in Python 2.7 using Kivy 1.9.1 as GUI library. Anaconda is used as the platform for Python and the other libraries used (such as scikit-learn) preprocessing, analysing and plotting the data set.
+This is the repository for the graphical user interface of the analysis of the data set used, in order to predict the consumers' purchasing decisions.
 
-Features (work in progress):
-- Load and Save the data set.
-- Label Encode the data (i.e. convert categorical string entries to numerical values in order to use e.g. Naive Bayesian Networks)
-- Split the data set into training set and validation/test set.
-- Settings tab to configure the following settings:
-  + Label Encoding: which columns to label encode.
-  + Split Data: target_column, test set size, seed (or random seed)
-  + Feature Importance: which features to exclude testing (such as target_column - does not make sense to test that)
-- Naive Bayesian Network. As the application is now, I can make a naive bayesian network based on the data set loaded.
-- Graphics/Dataplotting. Using matplotlib the following features will return a plot:
-  + Feature importance.
-  + Receiver Operator Characteristics of a given model (experimental at this point).
- 
+The application is written in Python 2.7 using Kivy 1.9.1 as GUI library. Anaconda (4.0.0) is used as the platform for Python and the other libraries used (such as scikit-learn) preprocessing, analysing and plotting the data set.
 
-Planned Features:
-- More settings in order to generalise the use of data set (i.e. any data set can be loaded and analysed).
-- Proper Cross Validation: k-fold CV, which can be turned on and off and adjusted in settings.
-- Decision Trees (RandomForest) implementation.
-- Boosting implemented (preferrably XGBoost, but I am having problems compiling on Windows).
-- Make logwindow saveable and improve useability overall.
+Features:
+- Please see the full report for features list.
+
+Requirements:
+- Python 2.7
+- Kivy 1.9.2
+- Anaconda 4.0 or equivelant (sklearn, scipy, matplotlib)
+- Seaborn 0.7
+- XGBoost >= 0.4
+
+The most important requirements are Python, Kivy and Anaconda (or equivelant w/sklearn, scipy, matplotlib). XGBoost and Seaborn can be removed from the source files, and the application would still run.
 
