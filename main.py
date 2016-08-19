@@ -14,28 +14,29 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.uix.switch import Switch
-from dataset import DataSet
-from greedyff import greedyFF
-#some stuff
+
+
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from sklearn import cross_validation
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.svm import SVC
-from sklearn.datasets import load_digits
 from sklearn.learning_curve import learning_curve
 import numpy as np
-#import graphs
-#some stuff end
+import datetime
+import time
+import pandas as pd
+import os
+#
+# import the libraries made by the author.
+#
+from dataset import DataSet
+from greedyff import greedyFF
 import randomForest
 import nbn
 import xgboost_model
-import datetime
-import time
-import timeit
-import pandas as pd
-import os
+# End import local files
+
+# Start class declarations.
 
 
 class LoadDialog(FloatLayout):
@@ -46,10 +47,6 @@ class LoadDialog(FloatLayout):
 class SaveDialog(FloatLayout):
     save = ObjectProperty(None)
     text_input = ObjectProperty(None)
-    cancel = ObjectProperty(None)
-
-class SplitData(FloatLayout):
-    split = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
 class Settings(FloatLayout):
@@ -94,6 +91,14 @@ class Settings(FloatLayout):
     def saveFIUse(self,apply_FI_list):
         self.newconfigFIUse = bool(apply_FI_list)
         return self.newconfigFIUse
+
+"""
+
+Root(FloatLayout) is the main window. Any modifications to the root will be shown in the main window
+when starting up.
+
+"""
+
 
 class Root(FloatLayout):
     loadfile = ObjectProperty(None)
@@ -352,6 +357,11 @@ class Root(FloatLayout):
             self.feedback("Succesfully label encoded the data.")
         else:
             self.feedback("Please load a dataset.")
+
+    """
+    Scales numerical values as specified, or creates an inverse feature list based on categorical
+    features and scales them. Can be modified in settings.
+     """
 
     def menu_scale(self):
         if self.loaded:
@@ -709,11 +719,14 @@ Number of %s
     """
     def menu_future_ext1(self):
         if self.loaded & self.split:
-            self.output_str("Future Extension #1")
+            self.output_str("Future Extension #1 ")
+
+            ## These lines were used to show the novel feature importance selector.
             est = 1
             depth = 2
             self.output_str("Demonstration 19.8 - Novel Feature Importance based on Random Forest")
             info, total_columns, dummy_y_percent = randomForest.fi_RandomForest_improved2(data,self.configFIUse,self.configFI, estimators=est, maximum_depth=depth)
+            ### End ---
         else:
             if self.loaded is False:
                 self.feedback("Please load a dataset.")
@@ -727,39 +740,9 @@ Number of %s
 
     """
 
-     TESTING NEW CODE
+     TESTING NEW CODE - kept for future use.
 
     """
-
-    def _roc_plot(self,y_proba,y,model='Unknown',title='Receiver Operating Characteristics',x_label="False Positive Rate",y_label='True Positive Rate',auc=None):
-        #from sklearn.metrics import mean_squared_error
-        #from sklearn.metrics import accuracy_score
-        from sklearn.metrics import roc_curve,roc_auc_score
-
-        if self.loaded:
-            if auc is None:
-                auc = roc_auc_score(y, y_proba[:, 1])
-
-            #list_mse_testing.append(mean_squared_error(y,pred_proba[:, 1]))
-            #list_acc.append(accuracy_score(data.y_test, np.argmax(pred_proba, axis = 1)))
-
-            import seaborn as sns
-            sns.set_style("white")
-            plt.figure()
-            plt.title(str(title))
-            plt.xlabel(str(x_label))
-            plt.ylabel(str(y_label))
-            #train_scores_mean = np.mean(train_scores, axis=1)
-            #train_scores_std = np.std(train_scores, axis=1)
-            plt.grid()
-            plt.plot(roc_curve(y, y_proba[:, 1])[:2], 'o-', c=sns.color_palette()[0], label=str(model) + " (AUC: %.2f)" % auc)
-            plt.plot((0., 1.), (0., 1.), "--k", alpha=.7)
-            #plt.plot(list_trees, list_mse_testing, '-', c=sns.color_palette()[1], label="Validation score")
-            plt.legend(loc="best")
-            # plt.savefig('D:\workdir\plot.png')
-            plt.show()
-
-
     def menu_plot(self):
         from sklearn.metrics import mean_squared_error
         from sklearn.metrics import accuracy_score
@@ -797,50 +780,6 @@ Number of %s
             plt.legend(loc="best")
             # plt.savefig('D:\workdir\plot.png')
             plt.show()
-
-
-    def menu_plot2(self):
-        title = "Learning Curves (Naive Bayes)"
-        cv = cross_validation.ShuffleSplit(n=data.X_train.shape[0], n_iter=10,test_size=0.2, random_state=0)
-
-        estimator = BernoulliNB()
-
-        #
-        ylim = None
-        n_jobs = 4
-        train_sizes = np.linspace(.1, 1.0, 5)
-
-        ds = data
-        X = ds.X_train
-        y = ds.y_train
-        plt.figure()
-        plt.title(title)
-        if ylim is not None:
-            plt.ylim(*ylim)
-        plt.xlabel("Training examples")
-        plt.ylabel("Score")
-        train_sizes, train_scores, test_scores = learning_curve(
-            estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
-        train_scores_mean = np.mean(train_scores, axis=1)
-        train_scores_std = np.std(train_scores, axis=1)
-        test_scores_mean = np.mean(test_scores, axis=1)
-        test_scores_std = np.std(test_scores, axis=1)
-        plt.grid()
-        plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                         train_scores_mean + train_scores_std, alpha=0.1,
-                         color="r")
-        plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                         test_scores_mean + test_scores_std, alpha=0.1, color="g")
-        plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-                 label="Training score")
-        plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-                 label="Cross-validation score")
-
-        plt.legend(loc="best")
-        #plt.savefig('D:\workdir\plot.png')
-        plt.show()
-
-
 
     """
     END TESTING
